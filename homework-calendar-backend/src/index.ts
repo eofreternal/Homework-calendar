@@ -43,9 +43,37 @@ const app = new Hono()
     },
   }))
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+  .get('/', (c) => {
+    return c.text('Hello Hono!')
+  })
+  .get("/assignment/", async (c) => {
+    //TODO: return the assignments due in the next week
+  })
+  .post("/assignment", zValidator("json", z.object({
+    name: z.string(),
+    description: z.string(),
+    type: z.enum(["assignment", "test/quiz"]),
+
+    startDate: z.number(),
+    dueDate: z.number()
+  })), authentication, async (c) => {
+    const user = await c.get("userData")
+    const body = await c.req.valid("json")
+
+    const assignment = await db.insert(schema.assignmentsTable).values({
+      name: body.name,
+      description: body.description,
+      type: body.type,
+      owner: user.id,
+
+      startDate: body.startDate,
+      dueDate: body.dueDate,
+
+      creationDate: Date.now()
+    }).returning()
+
+    c.json({ success: true, data: assignment[0] }, 201)
+  })
 
 export default {
   port: 5000,
