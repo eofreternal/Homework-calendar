@@ -25,6 +25,23 @@ if (defaultUser.length == 0) {
 }
 
 const app = new Hono()
+  .use(logger())
+  .use('*', cors({
+    origin: ["http://localhost:3000", "http://localhost:3001", "https://unejective-donnette-linguistically.ngrok-free.dev"],
+    credentials: true
+  }))
+  .use('*', sessionMiddleware({
+    store,
+    //TODO: add a proper password
+    encryptionKey: 'password_at_least_32_characters_long', // Required for CookieStore, recommended for others
+    expireAfterSeconds: 60 * 60 * 14, // Expire session after 14 days
+    cookieOptions: {
+      sameSite: 'None', // Recommended for basic CSRF protection in modern browsers
+      path: '/', // Required for this library to work properly
+      httpOnly: true, // Recommended to avoid XSS attacks,
+      secure: true
+    },
+  }))
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
