@@ -73,5 +73,5 @@ export const authentication = createMiddleware<{ Variables: AuthVariables & Sess
 
     c.set("userData", user)
 
-    next()
+    await next()
 })
