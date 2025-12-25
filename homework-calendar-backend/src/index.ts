@@ -99,9 +99,16 @@ const app = new Hono<{ Variables: SessionVariables }>()
 
     .get("/assignment", authentication, async (c) => {
         const userData = c.get("userData")
-
         const oneWeekInTheFuture = Date.now() + (7 * 24 * 60 * 60)
-        const assignments = await db.select().from(schema.assignmentsTable).where(and(and(lt(schema.assignmentsTable.dueDate, oneWeekInTheFuture), isNull(schema.assignmentsTable.completedDate)), eq(schema.usersTable.id, userData.id)))
+        const assignments = await db.select().from(schema.assignmentsTable).where(
+            and(
+                and(
+                    lt(schema.assignmentsTable.dueDate, oneWeekInTheFuture),
+                    isNull(schema.assignmentsTable.completedDate)
+                ),
+                eq(schema.assignmentsTable.owner, userData.id)
+            )
+        )
 
         return c.json({
             success: true,
