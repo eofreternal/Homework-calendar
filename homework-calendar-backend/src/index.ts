@@ -17,7 +17,7 @@ const store = new CookieStore()
 const defaultUser = await db.select().from(schema.usersTable).execute()
 if (defaultUser.length == 0) {
   await db.insert(schema.usersTable).values({
-    name: "Default User",
+    username: "Default User",
     password: await Bun.password.hash("default"),
 
     creationDate: Date.now()

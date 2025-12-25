@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm';
 
 export const usersTable = sqliteTable("users", {
     id: int().primaryKey({ autoIncrement: true }),
-    name: text().notNull(),
+    username: text().notNull().unique(),
     password: text().notNull(),
 
     creationDate: integer({ mode: "number" }).notNull()
