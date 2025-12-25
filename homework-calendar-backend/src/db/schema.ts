@@ -14,7 +14,7 @@ export const assignmentsTable = sqliteTable("assignments", {
     title: text().notNull(),
     description: text().notNull(),
     type: text({ enum: ["assignment", "test/quiz"] }).notNull(),
-    owner: int(),
+    owner: int().notNull(),
 
     startDate: integer({ mode: "number" }).notNull(),
     dueDate: integer({ mode: "number" }).notNull(),
