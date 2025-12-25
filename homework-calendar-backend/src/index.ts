@@ -72,7 +72,7 @@ const app = new Hono()
       creationDate: Date.now()
     }).returning()
 
-    c.json({ success: true, data: assignment[0] }, 201)
+    return c.json({ success: true, data: assignment[0] }, 201)
   })
 
 export default {
