@@ -1,0 +1,8 @@
+import { hc } from 'hono/client'
+import type { AppType } from "../../homework-calendar-backend/src/index.ts"
+
+export const client = hc<AppType>('http://localhost:5000/', {
+    init: {
+        credentials: 'include',
+    },
+})

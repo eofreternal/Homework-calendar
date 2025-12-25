@@ -63,12 +63,12 @@ export const authentication = createMiddleware<{ Variables: AuthVariables & Sess
     const id = session.get("id")
 
     if (id == null) {
-        return c.json({ success: false, data: "You must be logged in to perform this action" }, 401)
+        return c.json({ success: false, data: "You must be logged in to perform this action" } as const, 401)
     }
 
     const [user] = await db.select().from(schema.usersTable).where(eq(schema.usersTable.id, id))
     if (user == undefined) {
-        return c.json({ success: false, data: "Account doesn't exist. Wait, what?" }, 401)
+        return c.json({ success: false, data: "Account doesn't exist. Wait, what?" } as const, 401)
     }
 
     c.set("userData", user)

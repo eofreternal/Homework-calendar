@@ -8,9 +8,10 @@ import { logger } from 'hono/logger'
 
 import * as schema from "./db/schema"
 import * as z from "zod"
-import { authentication, zValidator } from './middleware';
+import { authentication, zValidator, type SessionVariables } from './middleware';
 
 import { db } from "./db/index"
+import { eq } from "drizzle-orm"
 
 const store = new CookieStore()
 
@@ -24,7 +25,7 @@ if (defaultUser.length == 0) {
   })
 }
 
-const app = new Hono()
+const app = new Hono<{ Variables: SessionVariables }>()
   .use(logger())
   .use('*', cors({
     origin: ["http://localhost:3000", "http://localhost:3001", "https://unejective-donnette-linguistically.ngrok-free.dev"],
@@ -46,6 +47,56 @@ const app = new Hono()
   .get('/', (c) => {
     return c.text('Hello Hono!')
   })
+  .post("/auth/register", zValidator("json", z.object({
+    username: z.string(),
+    password: z.string()
+  })), async (c) => {
+    const body = await c.req.valid("json")
+    const session = c.get("session")
+
+    const [usernameInUse] = await db.select().from(schema.usersTable).where(eq(schema.usersTable.username, body.username))
+    if (usernameInUse !== undefined) {
+      return c.json({ success: false, data: "Username in use" }, 404)
+    }
+
+    const hashedPassword = await Bun.password.hash(body.password)
+
+    const [user] = await db.insert(schema.usersTable).values({
+      username: body.username,
+      password: hashedPassword,
+      creationDate: Date.now()
+    }).returning()
+
+    session.set("id", user!.id)
+    return c.json({ success: true, data: user })
+  })
+
+  .post("/auth/login", zValidator("json", z.object({
+    username: z.string(),
+    password: z.string()
+  })), async (c) => {
+    const body = await c.req.valid("json")
+    const session = c.get("session")
+
+    const [user] = await db.select().from(schema.usersTable).where(eq(schema.usersTable.username, body.username))
+    if (user == undefined) {
+      return c.json({ success: false, data: "User not found" } as const, 404)
+    }
+
+    const validPassword = await Bun.password.verify(body.password, user.password)
+    if (validPassword == false) {
+      return c.json({ success: false, data: "User not found" } as const, 404)
+    }
+
+    session.set("id", user.id)
+    return c.json({
+      success: true,
+      data: {
+        username: user.username,
+      }
+    } as const)
+  })
+
   .get("/assignment/", async (c) => {
     //TODO: return the assignments due in the next week
   })
@@ -78,4 +129,5 @@ const app = new Hono()
 export default {
   port: 5000,
   fetch: app.fetch,
-} 
+}
+export type AppType = typeof app
