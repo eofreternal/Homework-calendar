@@ -28,7 +28,7 @@ if (defaultUser.length == 0) {
 const app = new Hono<{ Variables: SessionVariables }>()
   .use(logger())
   .use('*', cors({
-    origin: ["http://localhost:3000", "http://localhost:3001", "https://unejective-donnette-linguistically.ngrok-free.dev"],
+    origin: ["http://localhost:3000"],
     credentials: true
   }))
   .use('*', sessionMiddleware({
