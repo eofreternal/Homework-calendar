@@ -21,7 +21,7 @@ onMounted(async () => {
         return
     }
     toast.add({
-        color: "info",
+        color: "success",
         title: "Logged in"
     })
     userDataStore.setLoggedIn(true)
