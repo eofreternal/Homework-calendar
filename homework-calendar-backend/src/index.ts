@@ -56,7 +56,7 @@ const app = new Hono<{ Variables: SessionVariables }>()
 
         const [usernameInUse] = await db.select().from(schema.usersTable).where(eq(schema.usersTable.username, body.username))
         if (usernameInUse !== undefined) {
-            return c.json({ success: false, data: "Username in use" }, 404)
+            return c.json({ success: false, data: "Username in use" } as const, 404)
         }
 
         const hashedPassword = await Bun.password.hash(body.password)
@@ -68,7 +68,7 @@ const app = new Hono<{ Variables: SessionVariables }>()
         }).returning()
 
         session.set("id", user!.id)
-        return c.json({ success: true, data: user })
+        return c.json({ success: true, data: user } as const)
     })
 
     .post("/auth/login", zValidator("json", z.object({
@@ -103,7 +103,7 @@ const app = new Hono<{ Variables: SessionVariables }>()
         const assignments = await db.select().from(schema.assignmentsTable).where(
             and(
                 and(
-                    lt(schema.assignmentsTable.dueDate, oneWeekInTheFuture),
+                    lt(schema.assignmentsTable.dueDate, oneWeekInTheFuture), //TODO: sort by closest due date to furthest due date, limit to 10
                     isNull(schema.assignmentsTable.completedDate)
                 ),
                 eq(schema.assignmentsTable.owner, userData.id)
@@ -123,10 +123,10 @@ const app = new Hono<{ Variables: SessionVariables }>()
         startDate: z.number(),
         dueDate: z.number()
     })), authentication, async (c) => {
-        const user = await c.get("userData")
-        const body = await c.req.valid("json")
+        const user = c.get("userData")
+        const body = c.req.valid("json")
 
-        const assignment = await db.insert(schema.assignmentsTable).values({
+        const [assignment] = await db.insert(schema.assignmentsTable).values({
             title: body.title,
             description: body.description,
             type: body.type,
@@ -138,7 +138,7 @@ const app = new Hono<{ Variables: SessionVariables }>()
             creationDate: Date.now()
         }).returning()
 
-        return c.json({ success: true, data: assignment[0] }, 201)
+        return c.json({ success: true, data: assignment } as const, 201)
     })
 
 export default {
