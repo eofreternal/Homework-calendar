@@ -11,7 +11,7 @@ export const usersTable = sqliteTable("users", {
 
 export const assignmentsTable = sqliteTable("assignments", {
     id: int().primaryKey({ autoIncrement: true }),
-    name: text().notNull(),
+    title: text().notNull(),
     description: text().notNull(),
     type: text({ enum: ["assignment", "test/quiz"] }).notNull(),
     owner: int(),
@@ -19,6 +19,7 @@ export const assignmentsTable = sqliteTable("assignments", {
     startDate: integer({ mode: "number" }).notNull(),
     dueDate: integer({ mode: "number" }).notNull(),
 
+    completedDate: integer({ mode: "number" }),
     creationDate: integer({ mode: "number" }).notNull()
 })
 
