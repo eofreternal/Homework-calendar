@@ -19,7 +19,7 @@ export const assignmentsTable = sqliteTable("assignments", {
     startDate: integer({ mode: "number" }).notNull(),
     dueDate: integer({ mode: "number" }).notNull(),
 
-    completedDate: integer({ mode: "number" }),
+    completionDate: integer({ mode: "number" }),
     creationDate: integer({ mode: "number" }).notNull()
 })
 
