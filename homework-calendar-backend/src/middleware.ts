@@ -43,7 +43,7 @@ export const zValidator = <
                 }
             }
 
-            return c.json({ success: false, data: formattedMessage }, 400);
+            return c.json({ success: false, data: formattedMessage } as const, 400);
         }
     });
 };
