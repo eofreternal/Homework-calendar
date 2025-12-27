@@ -93,7 +93,11 @@ onMounted(async () => {
     assignments.value = assignmentsJson.data
 })
 
-function getEventsForDay(day: number) {
+function getEventsForDay(day: number | null) {
+    if (day == null) {
+        return []
+    }
+
     return assignments.value.filter(d => {
         const dueDate = new Date(d.dueDate)
         if (dueDate.getDate() == day) {
