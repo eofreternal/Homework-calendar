@@ -111,7 +111,7 @@ async function onSubmitCreateAssignment(event: FormSubmitEvent<createAssignmentS
         title: "Created assignment!",
         description: "Hurray!!!"
     })
-    assignments.value.push(response.data) //TODO: why is this infered as type | undefined?
+    assignments.value.push(response.data)
     return
 }
 

@@ -80,7 +80,7 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
             creationDate: Date.now()
         }).returning()
 
-        return c.json({ success: true, data: assignment } as const, 201)
+        return c.json({ success: true, data: assignment! } as const, 201)
     })
 
     .patch("/:id", zValidator("json", z.object({
