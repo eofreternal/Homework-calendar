@@ -172,7 +172,7 @@ async function toggleAssignmentAsCompleted(id: number) {
     })
     toast.add({
         color: "success",
-        title: `${assignments.value[index!].title} marked as ${value ? 'completed' : "uncompleted"}!`
+        title: `${assignments.value[index!]!.title} marked as ${value ? 'completed' : "uncompleted"}!`
     })
 }
 </script>
