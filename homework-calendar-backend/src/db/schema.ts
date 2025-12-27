@@ -14,6 +14,7 @@ export const assignmentsTable = sqliteTable("assignments", {
     title: text().notNull(),
     description: text().notNull(),
     type: text({ enum: ["assignment", "test/quiz"] }).notNull(),
+    class: int(),
     owner: int().notNull(),
 
     startDate: integer({ mode: "number" }).notNull(),
@@ -24,8 +25,21 @@ export const assignmentsTable = sqliteTable("assignments", {
 })
 
 export const assignmentsRelations = relations(assignmentsTable, ({ one }) => ({
-    owner: one(usersTable, {
+    ownerInfo: one(usersTable, {
         fields: [assignmentsTable.owner],
         references: [usersTable.id],
     }),
+    classInfo: one(classesTable, {
+        fields: [assignmentsTable.class],
+        references: [classesTable.id],
+    }),
 }));
+
+export const classesTable = sqliteTable("class", {
+    id: int().primaryKey({ autoIncrement: true }),
+    name: text().notNull(),
+    owner: int().notNull(),
+
+    archiveDate: integer({ mode: "number" }),
+    creationDate: integer({ mode: "number" }).notNull()
+});

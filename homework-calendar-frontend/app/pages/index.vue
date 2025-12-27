@@ -10,6 +10,8 @@ const userDataStore = useUserDataStore()
 const toast = useToast()
 
 const assignments = ref<Extract<InferResponseType<typeof client.assignment[":year"][":month"]["$get"]>, { success: true }>["data"]>([])
+const showCreateClassModal = ref(false)
+const classes = ref<Extract<InferResponseType<typeof client.assignment.classes["$post"]>, { success: true }>["data"][]>([])
 
 const today = new Date()
 const oneDayInTheFuture = new Date()
@@ -20,11 +22,19 @@ const createAssignmentZodSchema = z.object({
     title: z.string(),
     description: z.string(),
     type: z.union([z.literal("assignment"), z.literal("test/quiz")]),
+    class: z.union([z.string(), z.literal("No Class")])
 })
 type createAssignmentSchema = z.infer<typeof createAssignmentZodSchema>
 const createAssignmentState = reactive<Partial<createAssignmentSchema>>({
-    type: "assignment"
+    type: "assignment",
+    class: "No Class"
 })
+
+const createClassZodSchema = z.object({
+    name: z.string(),
+})
+type createClassSchema = z.infer<typeof createClassZodSchema>
+const createClassState = reactive<Partial<createClassSchema>>({})
 
 const viewCalendarDate = shallowRef(new CalendarDate(today.getFullYear(), today.getMonth(), today.getDay()))
 const calendarDays = computed(() => {
@@ -48,51 +58,6 @@ const calendarDays = computed(() => {
     return days
 })
 
-onMounted(async () => {
-    toast.add({
-        color: "info",
-        title: "Logging in..."
-    })
-    const login = await client.auth.login.$post({ json: { username: "Default User", password: "default" } })
-    const json = await login.json()
-    if (json.success == false) {
-        toast.add({
-            color: "error",
-            title: "Something went wrong",
-            description: json.data
-        })
-        return
-    }
-    toast.add({
-        color: "success",
-        title: "Logged in"
-    })
-    userDataStore.setLoggedIn(true)
-    userDataStore.setData(json.data) //TODO: why does typescript think this can be undefined?
-
-    const assignmentsRequest = await client.assignment[':year'][':month'].$get({
-        param: {
-            year: today.getFullYear().toString(),
-            month: today.getMonth().toString()
-        },
-        query: {
-            getCompletedOnly: undefined
-        }
-    })
-    const assignmentsJson = await assignmentsRequest.json()
-
-    if (assignmentsJson.success == false) { //TODO: why isn't hono infering the authentication middleware return type?
-        toast.add({
-            color: "error",
-            title: "Something went wrong fetching pending assignments",
-            description: assignmentsJson.data
-        })
-        return
-    }
-
-    assignments.value = assignmentsJson.data
-})
-
 function getEventsForDay(day: number | null) {
     if (day == null) {
         return []
@@ -106,12 +71,25 @@ function getEventsForDay(day: number | null) {
     })
 }
 
+function findClassIdByClassName(name: string) {
+    if (name == "No Class") {
+        return undefined
+    }
+
+    return classes.value.find(value => {
+        return value.name == name
+    })?.id
+}
+
 async function onSubmitCreateAssignment(event: FormSubmitEvent<createAssignmentSchema>) {
+    const classId = findClassIdByClassName(event.data.class)
+
     const create = await client.assignment.$post({
         json: {
             title: event.data.title,
             description: event.data.description,
             type: event.data.type,
+            class: classId,
 
             startDate: createAssignmentStartDate.value.toDate("est").getTime(),
             dueDate: createAssignmentDueDate.value.toDate("est").getTime()
@@ -175,6 +153,73 @@ async function toggleAssignmentAsCompleted(id: number) {
         title: `${assignments.value[index!]!.title} marked as ${value ? 'completed' : "uncompleted"}!`
     })
 }
+
+async function onSubmitCreateClass(event: FormSubmitEvent<createClassSchema>) {
+    const request = await client.assignment.classes.$post({
+        json: {
+            name: event.data.name
+        }
+    })
+    const response = await request.json()
+
+    if (response.success == false) {
+        toast.add({
+            color: "error",
+            title: "Something went wrong",
+            description: response.data
+        })
+        return
+    }
+
+    classes.value.push(response.data)
+    createAssignmentState.class = event.data.name
+    showCreateClassModal.value = false
+}
+
+onMounted(async () => {
+    toast.add({
+        color: "info",
+        title: "Logging in..."
+    })
+    const login = await client.auth.login.$post({ json: { username: "Default User", password: "default" } })
+    const json = await login.json()
+    if (json.success == false) {
+        toast.add({
+            color: "error",
+            title: "Something went wrong",
+            description: json.data
+        })
+        return
+    }
+    toast.add({
+        color: "success",
+        title: "Logged in"
+    })
+    userDataStore.setLoggedIn(true)
+    userDataStore.setData(json.data) //TODO: why does typescript think this can be undefined?
+
+    const assignmentsRequest = await client.assignment[':year'][':month'].$get({
+        param: {
+            year: today.getFullYear().toString(),
+            month: today.getMonth().toString()
+        },
+        query: {
+            getCompletedOnly: undefined
+        }
+    })
+    const assignmentsJson = await assignmentsRequest.json()
+
+    if (assignmentsJson.success == false) { //TODO: why isn't hono infering the authentication middleware return type?
+        toast.add({
+            color: "error",
+            title: "Something went wrong fetching pending assignments",
+            description: assignmentsJson.data
+        })
+        return
+    }
+
+    assignments.value = assignmentsJson.data
+})
 </script>
 
 <template>
@@ -190,29 +235,61 @@ async function toggleAssignmentAsCompleted(id: number) {
                     <UButton>Create assignment</UButton>
 
                     <template #content>
-                        <UForm :schema="createAssignmentZodSchema" :state="createAssignmentState"
-                            @submit="onSubmitCreateAssignment">
+                        <UContainer class="create-assignment-wrapper">
+                            <UForm :schema="createAssignmentZodSchema" :state="createAssignmentState"
+                                @submit="onSubmitCreateAssignment" class="form">
 
-                            <UFormField label="Title">
-                                <UInput placeholder="World History assignment" v-model="createAssignmentState.title" />
-                            </UFormField>
-                            <UFormField label="Description">
-                                <UTextarea placeholder="For Mr. Smiths class"
-                                    v-model="createAssignmentState.description" />
-                            </UFormField>
+                                <UFormField label="Title">
+                                    <UInput placeholder="World History assignment"
+                                        v-model="createAssignmentState.title" />
+                                </UFormField>
+                                <UFormField label="Description">
+                                    <UTextarea placeholder="For Mr. Smiths class"
+                                        v-model="createAssignmentState.description" />
+                                </UFormField>
 
-                            <UFormField label="Start Date">
-                                <UInputDate v-model="createAssignmentStartDate" />
-                            </UFormField>
+                                <UFormField label="Type">
+                                    <USelect v-model="createAssignmentState.type" :items="['assignment', 'test/quiz']"
+                                        class="w-48" />
+                                </UFormField>
 
-                            <UFormField label="Due Date">
-                                <UInputDate v-model="createAssignmentDueDate" />
-                            </UFormField>
+                                <UFormField label="Class (optional)">
+                                    <USelect v-model="createAssignmentState.class"
+                                        :items="[...classes.map(a => a.name), 'No Class']" class="w-48" />
 
-                            <UButton loading-auto type="submit">
-                                Submit
-                            </UButton>
-                        </UForm>
+                                    <UModal v-model:open="showCreateClassModal">
+                                        <UButton @click="showCreateClassModal = true" label="Create class"
+                                            color="neutral" variant="subtle" />
+
+                                        <template #content>
+                                            <UForm :schema="createClassZodSchema" :state="createClassState"
+                                                @submit="onSubmitCreateClass">
+                                                <UFormField label="Name">
+                                                    <UInput placeholder="Science class"
+                                                        v-model="createClassState.name" />
+                                                </UFormField>
+
+                                                <UButton type="submit">Create class</UButton>
+                                            </UForm>
+                                        </template>
+                                    </UModal>
+                                </UFormField>
+
+                                <div class="dates">
+                                    <UFormField label="Start Date">
+                                        <UInputDate v-model="createAssignmentStartDate" />
+                                    </UFormField>
+
+                                    <UFormField label="Due Date">
+                                        <UInputDate v-model="createAssignmentDueDate" />
+                                    </UFormField>
+                                </div>
+
+                                <UButton loading-auto type="submit">
+                                    Submit
+                                </UButton>
+                            </UForm>
+                        </UContainer>
                     </template>
                 </UModal>
             </header>
@@ -280,6 +357,26 @@ async function toggleAssignmentAsCompleted(id: number) {
 </template>
 
 <style lang="scss" scoped>
+.create-assignment-wrapper {
+    padding: 1rem;
+
+    .form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .dates {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+        }
+
+        button {
+            width: fit-content;
+        }
+    }
+}
+
 main {
     display: flex;
     flex-direction: row;
