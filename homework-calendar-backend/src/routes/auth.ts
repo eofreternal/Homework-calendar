@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { zValidator, type SessionVariables } from './../middleware';
 import * as schema from "../db/schema"
+import { eq } from "drizzle-orm"
 import { db } from "../db/index"
 import * as z from "zod"
 
