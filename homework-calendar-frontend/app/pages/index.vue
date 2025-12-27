@@ -226,7 +226,7 @@ async function toggleAssignmentAsCompleted(id: number) {
 
                 <div class="days-container">
                     <div class="day" v-for="day in calendarDays"
-                        :class="{ 'has-assignments': getEventsForDay(day).length > 0 }">
+                        :class="{ 'has-assignments': getEventsForDay(day).length > 0, 'today': new Date().getDate() == day }">
                         {{ day }}
                     </div>
                 </div>
@@ -303,8 +303,14 @@ main {
                 min-height: 120px;
                 max-width: 100%;
 
+                border-radius: 8px;
+
                 &.has-assignments {
-                    border: 1px solid green;
+                    border: 3px solid var(--ui-primary);
+                }
+
+                &.today {
+                    border: 3px solid white;
                 }
             }
         }
