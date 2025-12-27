@@ -228,6 +228,15 @@ async function toggleAssignmentAsCompleted(id: number) {
                     <div class="day" v-for="day in calendarDays"
                         :class="{ 'has-assignments': getEventsForDay(day).length > 0, 'today': new Date().getDate() == day }">
                         {{ day }}
+                        <ul>
+                            <li v-for="(item, index) in getEventsForDay(day)" v-show="index < 3" :key="index"
+                                class="assignment">
+                                {{ item.title }}
+                            </li>
+                            <li v-if="getEventsForDay(day).length > 3">
+                                +{{ getEventsForDay(day).length - 3 }} more items
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -311,6 +320,10 @@ main {
 
                 &.today {
                     border: 3px solid white;
+                }
+
+                .assignment {
+                    font-size: 12px;
                 }
             }
         }
