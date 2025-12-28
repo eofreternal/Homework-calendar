@@ -260,16 +260,16 @@ onMounted(async () => {
                             <UForm :schema="createAssignmentZodSchema" :state="createAssignmentState"
                                 @submit="onSubmitCreateAssignment" class="form">
 
-                                <UFormField label="Title">
+                                <UFormField label="Title" required>
                                     <UInput placeholder="World History assignment"
                                         v-model="createAssignmentState.title" />
                                 </UFormField>
-                                <UFormField label="Description">
+                                <UFormField label="Description (optional)">
                                     <UTextarea placeholder="For Mr. Smiths class"
                                         v-model="createAssignmentState.description" />
                                 </UFormField>
 
-                                <UFormField label="Type">
+                                <UFormField label="Type" required>
                                     <USelect v-model="createAssignmentState.type" :items="['assignment', 'test/quiz']"
                                         class="w-48" />
                                 </UFormField>
@@ -296,7 +296,6 @@ onMounted(async () => {
                                     </UModal>
                                 </UFormField>
 
-                                <div class="dates">
                                 <UFormField label="Estimated completion time"
                                     class="estimated-completetion-time-container" required>
                                     <UInputNumber v-model="createAssignmentEstimatedCompletionTimeHours" :min="0"
@@ -314,6 +313,7 @@ onMounted(async () => {
                                         }" />
                                 </UFormField>
 
+                                <div class="dates-container" required>
                                     <UFormField label="Start Date">
                                         <UInputDate v-model="createAssignmentStartDate" />
                                     </UFormField>
