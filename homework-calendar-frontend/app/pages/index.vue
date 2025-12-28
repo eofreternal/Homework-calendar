@@ -373,7 +373,7 @@ onMounted(async () => {
                         <h1>{{ work.title }}</h1>
                         <p class="desc">{{ work.description }}</p>
 
-                        <p>{{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
+                        <p>Estimated time: {{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
                         <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
                         <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
                             work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
@@ -385,7 +385,7 @@ onMounted(async () => {
                         <h1>{{ work.title }}</h1>
                         <p class="desc">{{ work.description }}</p>
 
-                        <p>{{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
+                        <p>Estimated time: {{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
                         <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
                         <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
                             work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
@@ -405,7 +405,11 @@ onMounted(async () => {
         flex-direction: column;
         gap: 0.5rem;
 
-        .dates {
+        .dates-container {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+        }
 
         .estimated-completion-time-container {
             display: flex;
@@ -445,7 +449,7 @@ main {
             gap: 1px;
 
             .day {
-                display: border-box;
+                box-sizing: border-box;
 
                 padding: 0.5rem;
                 min-height: 120px;
