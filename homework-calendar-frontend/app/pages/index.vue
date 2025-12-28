@@ -11,6 +11,7 @@ const toast = useToast()
 
 const assignments = ref<Extract<InferResponseType<typeof client.assignment[":year"][":month"]["$get"]>, { success: true }>["data"]>([])
 const showCreateClassModal = ref(false)
+const showCreateAssignmentModal = ref(false)
 const classes = ref<Extract<InferResponseType<typeof client.assignment.classes["$post"]>, { success: true }>["data"][]>([])
 
 const today = new Date()
@@ -116,6 +117,7 @@ async function onSubmitCreateAssignment(event: FormSubmitEvent<createAssignmentS
         description: "Hurray!!!"
     })
     assignments.value.push(response.data)
+    showCreateAssignmentModal.value = false
     return
 }
 
@@ -250,9 +252,9 @@ onMounted(async () => {
                         "August", "September", "October", "November", "December"].at(viewCalendarDate.month) }}
                 </h1>
 
-                <UModal>
-                    <UButton>Create assignment</UButton>
+                <UButton @click="showCreateAssignmentModal = true">Create assignment</UButton>
 
+                <UModal v-model:open="showCreateAssignmentModal">
                     <template #content>
                         <UContainer class="create-assignment-wrapper">
                             <UForm :schema="createAssignmentZodSchema" :state="createAssignmentState"
