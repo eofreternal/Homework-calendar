@@ -453,6 +453,8 @@ main {
 
                 border-radius: 8px;
 
+                overflow: hidden;
+
                 &.has-assignments {
                     border: 3px solid var(--ui-primary);
                 }
@@ -463,6 +465,11 @@ main {
 
                 .assignment {
                     font-size: 12px;
+
+                    max-width: 100%;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
 
                     &.strikethrough {
                         text-decoration: line-through;
