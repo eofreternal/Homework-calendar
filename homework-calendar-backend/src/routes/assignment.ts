@@ -115,7 +115,8 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
         if (body.dueDate) {
             update["dueDate"] = body.dueDate
         }
-        if (body.completionDate) {
+        // allows for null so that projects can be marked as uncompleted if it was previously marked as completed
+        if (body.completionDate !== undefined) {
             update["completionDate"] = body.completionDate
         }
 
