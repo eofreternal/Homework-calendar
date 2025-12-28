@@ -57,7 +57,7 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
     })
     .post("/", zValidator("json", z.object({
         title: z.string(),
-        description: z.string(),
+        description: z.string().optional(),
         type: z.enum(["assignment", "test/quiz"]),
         class: z.number().optional(),
         estimatedCompletionMinutes: z.number(),

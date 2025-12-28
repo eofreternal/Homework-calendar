@@ -22,7 +22,7 @@ const createAssignmentEstimatedCompletionTimeHours = ref(1)
 const createAssignmentEstimatedCompletionTimeMinutes = ref(0)
 const createAssignmentZodSchema = z.object({
     title: z.string(),
-    description: z.string(),
+    description: z.string().optional(),
     type: z.union([z.literal("assignment"), z.literal("test/quiz")]),
     class: z.union([z.string(), z.literal("No Class")])
 })

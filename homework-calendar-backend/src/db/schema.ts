@@ -12,7 +12,7 @@ export const usersTable = sqliteTable("users", {
 export const assignmentsTable = sqliteTable("assignments", {
     id: int().primaryKey({ autoIncrement: true }),
     title: text().notNull(),
-    description: text().notNull(),
+    description: text(),
     type: text({ enum: ["assignment", "test/quiz"] }).notNull(),
     class: int(),
     owner: int().notNull(),
