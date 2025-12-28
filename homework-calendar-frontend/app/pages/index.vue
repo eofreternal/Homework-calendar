@@ -345,7 +345,7 @@ onMounted(async () => {
                         {{ day }}
                         <ul>
                             <li v-for="(item, index) in getEventsForDay(day)" v-show="index < 3" :key="index"
-                                class="assignment">
+                                class="assignment" :class="{ 'strikethrough': item.completionDate !== null }">
                                 {{ item.title }}
                             </li>
                             <li v-if="getEventsForDay(day).length > 3">
@@ -463,6 +463,10 @@ main {
 
                 .assignment {
                     font-size: 12px;
+
+                    &.strikethrough {
+                        text-decoration: line-through;
+                    }
                 }
             }
         }
