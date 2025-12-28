@@ -18,6 +18,8 @@ const oneDayInTheFuture = new Date()
 oneDayInTheFuture.setDate(oneDayInTheFuture.getDate() + 1);
 const createAssignmentStartDate = shallowRef(new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate()))
 const createAssignmentDueDate = shallowRef(new CalendarDate(oneDayInTheFuture.getFullYear(), oneDayInTheFuture.getMonth() + 1, oneDayInTheFuture.getDate()))
+const createAssignmentEstimatedCompletionTimeHours = ref(1)
+const createAssignmentEstimatedCompletionTimeMinutes = ref(0)
 const createAssignmentZodSchema = z.object({
     title: z.string(),
     description: z.string(),
@@ -83,6 +85,7 @@ function findClassIdByClassName(name: string) {
 
 async function onSubmitCreateAssignment(event: FormSubmitEvent<createAssignmentSchema>) {
     const classId = findClassIdByClassName(event.data.class)
+    const estimatedCompletionMinutes = (createAssignmentEstimatedCompletionTimeHours.value * 60) + createAssignmentEstimatedCompletionTimeMinutes.value
 
     const create = await client.assignment.$post({
         json: {
@@ -90,6 +93,7 @@ async function onSubmitCreateAssignment(event: FormSubmitEvent<createAssignmentS
             description: event.data.description,
             type: event.data.type,
             class: classId,
+            estimatedCompletionMinutes: estimatedCompletionMinutes,
 
             startDate: createAssignmentStartDate.value.toDate("est").getTime(),
             dueDate: createAssignmentDueDate.value.toDate("est").getTime()
@@ -174,6 +178,21 @@ async function onSubmitCreateClass(event: FormSubmitEvent<createClassSchema>) {
     classes.value.push(response.data)
     createAssignmentState.class = event.data.name
     showCreateClassModal.value = false
+}
+
+function convertMinutesToFormattedString(minutes: number) {
+    const normalizedHours = Math.floor(minutes / 60)
+    const normalizedMinutes = minutes % 60
+
+    if (normalizedHours < 1) {
+        return `${normalizedMinutes} minute${normalizedMinutes == 1 ? "" : "s"}`
+    }
+
+    if (normalizedMinutes < 1) {
+        return `${normalizedHours} hour${normalizedHours == 1 ? "" : "s"}`
+    }
+
+    return `${normalizedHours} hour${normalizedHours == 1 ? "" : "s"} and ${normalizedMinutes} minute${normalizedMinutes == 1 ? "" : "s"}`
 }
 
 onMounted(async () => {
@@ -276,6 +295,23 @@ onMounted(async () => {
                                 </UFormField>
 
                                 <div class="dates">
+                                <UFormField label="Estimated completion time"
+                                    class="estimated-completetion-time-container" required>
+                                    <UInputNumber v-model="createAssignmentEstimatedCompletionTimeHours" :min="0"
+                                        :step="1" :format-options="{
+                                            style: 'unit',
+                                            unit: 'hour',
+                                            unitDisplay: 'long',
+                                        }" />
+
+                                    <UInputNumber v-model="createAssignmentEstimatedCompletionTimeMinutes" :min="0"
+                                        :max="60" :step="1" :format-options="{
+                                            style: 'unit',
+                                            unit: 'minute',
+                                            unitDisplay: 'long',
+                                        }" />
+                                </UFormField>
+
                                     <UFormField label="Start Date">
                                         <UInputDate v-model="createAssignmentStartDate" />
                                     </UFormField>
@@ -335,6 +371,7 @@ onMounted(async () => {
                         <h1>{{ work.title }}</h1>
                         <p class="desc">{{ work.description }}</p>
 
+                        <p>{{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
                         <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
                         <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
                             work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
@@ -346,6 +383,7 @@ onMounted(async () => {
                         <h1>{{ work.title }}</h1>
                         <p class="desc">{{ work.description }}</p>
 
+                        <p>{{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
                         <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
                         <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
                             work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
@@ -366,6 +404,8 @@ onMounted(async () => {
         gap: 0.5rem;
 
         .dates {
+
+        .estimated-completion-time-container {
             display: flex;
             flex-direction: row;
             gap: 0.5rem;

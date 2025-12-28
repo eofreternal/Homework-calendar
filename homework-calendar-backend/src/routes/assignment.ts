@@ -60,6 +60,7 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
         description: z.string(),
         type: z.enum(["assignment", "test/quiz"]),
         class: z.number().optional(),
+        estimatedCompletionMinutes: z.number(),
 
         startDate: z.number(),
         dueDate: z.number()
@@ -73,6 +74,7 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
             type: body.type,
             owner: user.id,
             class: body.class,
+            estimatedCompletionMinutes: body.estimatedCompletionMinutes,
 
             startDate: body.startDate,
             dueDate: body.dueDate,
