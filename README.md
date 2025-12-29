@@ -4,6 +4,16 @@ Trouble keeping track of tests and homework due dates? Introducing the Homework 
 
 Its a work-in-progress lol
 
-To run locally, cloen this repo and make sure you have Bun and PostgreSQL installed
-then CD into the frontend folder and install all the packages with `bun install` and do the same for the backend
-then just run `bun run dev` in both folders
+---
+
+I thought I'd use Bun this time instead of NodeJS to try something new
+I must say- `bun install` is faster than `pnpm` and `npm` hehe; I love `bun install`
+
+# Hosting instructions
+
+1. Install Bun :D
+2. Clone the repo
+3. `cd` into the frontend and backend directories and run `bun install` in each
+4. Run `bun run dev` in both folders too
+5. Visit `localhost:3000` in your browser
+6. Use it to organize your messy student life :p
