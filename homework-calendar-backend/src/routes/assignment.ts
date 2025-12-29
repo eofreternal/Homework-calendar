@@ -59,7 +59,7 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
                 eq(schema.assignmentsTable.owner, userData.id),
                 isNotNull(schema.assignmentsTable.completionDate)
             )
-        ).limit(10).orderBy(desc(schema.assignmentsTable.creationDate));
+        ).limit(10).orderBy(desc(schema.assignmentsTable.completionDate));
 
         return c.json({
             success: true,

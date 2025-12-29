@@ -377,7 +377,8 @@ onMounted(async () => {
                 </template>
 
                 <template #completed>
-                    <UCard v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null">
+                    <UCard v-for="work in assignments.sort((a, b) => b.completionDate! - a.completionDate!)"
+                        :key="work.id" v-show="work.completionDate !== null">
                         <h1>{{ work.title }}</h1>
                         <p class="desc">{{ work.description }}</p>
 
