@@ -216,7 +216,7 @@ onMounted(async () => {
         title: "Logged in"
     })
     userDataStore.setLoggedIn(true)
-    userDataStore.setData(json.data) //TODO: why does typescript think this can be undefined?
+    userDataStore.setData(json.data)
 
     const assignmentsRequest = await client.assignment.$get({
         query: {
@@ -225,7 +225,7 @@ onMounted(async () => {
     })
     const assignmentsJson = await assignmentsRequest.json()
 
-    if (assignmentsJson.success == false) { //TODO: why isn't hono infering the authentication middleware return type?
+    if (assignmentsJson.success == false) {
         toast.add({
             color: "error",
             title: "Something went wrong fetching pending assignments",
