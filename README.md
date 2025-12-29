@@ -1,3 +1,5 @@
+License: https://creativecommons.org/licenses/by-nc/4.0/
+
 Trouble keeping track of tests and homework due dates? Introducing the Homework Calendar 9000! In one place, you can add tests and assignments and it will remind you and help you prioritize your next assignment :D
 
 Its a work-in-progress lol
