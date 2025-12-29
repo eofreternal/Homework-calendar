@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { authentication, zValidator, type SessionVariables } from './../middleware';
-import { eq, lt, gt, and, isNull } from "drizzle-orm"
+import { eq, lt, gt, and, isNull, isNotNull, desc } from "drizzle-orm"
 import { db } from "../db/index"
 import * as schema from "../db/schema"
 import * as z from "zod"
@@ -27,32 +27,43 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
         return c.json({ success: true, data: data! } as const, 200)
     })
 
-    .get("/:year/:month", zValidator("query", z.object({
-        getCompletedOnly: z.string().optional()
+    .get("/", zValidator("query", z.object({
+        startDate: z.string().optional(),
+        endDate: z.string()
     })), authentication, async (c) => {
         const userData = c.get("userData")
-        const year = parseInt(c.req.param("year"))
-        const month = parseInt(c.req.param("month"))
+        const startDate = c.req.query("startDate")
+        const endDate = c.req.query("endDate")
 
-        if (isNaN(year) || isNaN(month)) {
-            return c.json({ success: false, data: "Why is year or month NaN?" } as const, 400)
+        if (endDate === undefined) {
+            return c.json({ success: false, data: "`endDate` is a required query param" } as const, 400)
         }
 
-        const beginningOfMonth = new Date(year, month, 1).getTime()
-        const endOfMonth = new Date(year, month + 1, 0).getTime()
-        const assignments = await db.select().from(schema.assignmentsTable).where(
+        const start = isNaN(Date.parse(startDate!)) ? Date.parse("1-1-1970") : Date.parse(startDate!)
+        const end = Date.parse(endDate)
+        const uncompletedAssignments = await db.select().from(schema.assignmentsTable).where(
             and(
                 and(
-                    lt(schema.assignmentsTable.dueDate, endOfMonth),
-                    gt(schema.assignmentsTable.dueDate, beginningOfMonth)
+                    and(
+                        gt(schema.assignmentsTable.dueDate, start),
+                        lt(schema.assignmentsTable.dueDate, end),
+                    ),
+                    isNull(schema.assignmentsTable.completionDate)
                 ),
-                eq(schema.assignmentsTable.owner, userData.id)
+                eq(schema.assignmentsTable.owner, userData.id),
             )
         )
 
+        const completedAssignments = await db.select().from(schema.assignmentsTable).where(
+            and(
+                eq(schema.assignmentsTable.owner, userData.id),
+                isNotNull(schema.assignmentsTable.completionDate)
+            )
+        ).limit(10).orderBy(desc(schema.assignmentsTable.creationDate));
+
         return c.json({
             success: true,
-            data: assignments
+            data: [...uncompletedAssignments, ...completedAssignments]
         } as const)
     })
     .post("/", zValidator("json", z.object({

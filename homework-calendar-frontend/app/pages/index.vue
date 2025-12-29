@@ -9,7 +9,7 @@ import { CalendarDate } from '@internationalized/date'
 const userDataStore = useUserDataStore()
 const toast = useToast()
 
-const assignments = ref<Extract<InferResponseType<typeof client.assignment[":year"][":month"]["$get"]>, { success: true }>["data"]>([])
+const assignments = ref<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]>([])
 const showCreateClassModal = ref(false)
 const showCreateAssignmentModal = ref(false)
 const classes = ref<Extract<InferResponseType<typeof client.assignment.classes["$post"]>, { success: true }>["data"][]>([])
@@ -44,31 +44,30 @@ const calendarDays = computed(() => {
     const year = viewCalendarDate.value.year
     const month = viewCalendarDate.value.month - 1 // CalendarDate months start at 1. Date starts at 0
 
-    const firstDate = new Date(year, month, 1)
-    const lastDate = new Date(year, month + 1, 0)
+    const firstDate = new Date(year, month + 1, 1)
+    const lastDate = new Date(year, month + 2, 0)
     const daysInMonth = lastDate.getDate()
     const startingDayOfTheWeek = firstDate.getDay()
-
     const days = []
     for (let i = 0; i < startingDayOfTheWeek; i++) {
         days.push(null)
     }
 
     for (let i = 0; i < daysInMonth; i++) {
-        days.push(i)
+        days.push(i + 1)
     }
 
     return days
 })
 
-function getEventsForDay(day: number | null) {
+function getEventsForDay(month: number, day: number | null) {
     if (day == null) {
         return []
     }
 
     return assignments.value.filter(d => {
         const dueDate = new Date(d.dueDate)
-        if (dueDate.getDate() == day) {
+        if (dueDate.getDate() == day && dueDate.getMonth() == month) {
             return true
         }
     })
@@ -219,13 +218,9 @@ onMounted(async () => {
     userDataStore.setLoggedIn(true)
     userDataStore.setData(json.data) //TODO: why does typescript think this can be undefined?
 
-    const assignmentsRequest = await client.assignment[':year'][':month'].$get({
-        param: {
-            year: today.getFullYear().toString(),
-            month: today.getMonth().toString()
-        },
+    const assignmentsRequest = await client.assignment.$get({
         query: {
-            getCompletedOnly: undefined
+            endDate: Intl.DateTimeFormat("en-GB").format(new Date(today.getFullYear(), today.getMonth() + 1, 0)).split("/").reverse().join("-")
         }
     })
     const assignmentsJson = await assignmentsRequest.json()
@@ -341,15 +336,16 @@ onMounted(async () => {
 
                 <div class="days-container">
                     <div class="day" v-for="day in calendarDays"
-                        :class="{ 'has-assignments': getEventsForDay(day).length > 0, 'today': new Date().getDate() == day }">
+                        :class="{ 'has-assignments': getEventsForDay(today.getMonth(), day).length > 0, 'today': new Date().getDate() == day }">
                         {{ day }}
                         <ul>
-                            <li v-for="(item, index) in getEventsForDay(day)" v-show="index < 3" :key="index"
-                                class="assignment" :class="{ 'strikethrough': item.completionDate !== null }">
+                            <li v-for="(item, index) in getEventsForDay(today.getMonth(), day)" v-show="index < 3"
+                                :key="index" class="assignment"
+                                :class="{ 'strikethrough': item.completionDate !== null }">
                                 {{ item.title }}
                             </li>
-                            <li v-if="getEventsForDay(day).length > 3">
-                                +{{ getEventsForDay(day).length - 3 }} more items
+                            <li v-if="getEventsForDay(today.getMonth(), day).length > 3">
+                                +{{ getEventsForDay(today.getMonth(), day).length - 3 }} more items
                             </li>
                         </ul>
                     </div>
