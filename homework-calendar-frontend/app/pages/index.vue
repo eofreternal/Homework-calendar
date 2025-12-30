@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { client } from '~/utils';
+import { client, MONTHS } from '~/utils';
 import { useUserDataStore } from '~/stores/userDataStore';
 import type { InferResponseType } from 'hono';
 import type { FormSubmitEvent } from '@nuxt/ui'
@@ -9,6 +9,7 @@ import { CalendarDate } from '@internationalized/date'
 const userDataStore = useUserDataStore()
 const toast = useToast()
 
+const oldAssignments = ref<Map<typeof MONTHS[number], Map<number, (Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"])>>>(new Map())
 const assignments = ref<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]>([])
 const showCreateClassModal = ref(false)
 const showCreateAssignmentModal = ref(false)
@@ -235,6 +236,32 @@ onMounted(async () => {
     }
 
     assignments.value = assignmentsJson.data
+
+    const temp = assignmentsJson.data.filter(item => {
+        if (new Date(item.dueDate).getMonth() !== today.getMonth()) {
+            return true
+        }
+
+        return false
+    })
+
+    temp.forEach(item => {
+        const dueDate = new Date(item.dueDate)
+        const assignmentDueMonth = MONTHS[dueDate.getMonth() - 1]!
+        const monthData = oldAssignments.value.get(assignmentDueMonth)
+
+        if (monthData === undefined) {
+            oldAssignments.value.set(assignmentDueMonth, new Map([[dueDate.getDate(), [item]]]))
+            return
+        }
+
+        const dateData = monthData.get(dueDate.getDate())
+        if (dateData === undefined) {
+            monthData.set(dueDate.getDate(), [item])
+            return
+        }
+        monthData.set(dueDate.getDate(), [...dateData, item])
+    })
 })
 </script>
 
@@ -327,6 +354,28 @@ onMounted(async () => {
                 </UModal>
             </header>
 
+            <UContainer class="old-assignments-container">
+                <div v-for="month in oldAssignments.keys()" class="month">
+                    <h1>{{ month }}</h1>
+                    <UContainer class="day-container">
+                        <template v-for="days in oldAssignments.get(month)" class="day">
+                            <div class="day">
+                                {{ days[0] }}
+                                <ul>
+                                    <li v-for="(item, index) in days[1]" v-show="index < 3" :key="index"
+                                        class="assignment" :class="{ 'strikethrough': item.completionDate !== null }">
+                                        {{ item.title }}
+                                    </li>
+                                    <li v-if="days[1].length > 3">
+                                        +{{ days[1].length - 3 }} more items
+                                    </li>
+                                </ul>
+                            </div>
+                        </template>
+                    </UContainer>
+                </div>
+            </UContainer>
+
             <div class="calendar">
                 <div class="weekday-headers">
                     <div v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
@@ -395,6 +444,10 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+.strikethrough {
+    text-decoration: line-through;
+}
+
 .create-assignment-wrapper {
     padding: 1rem;
 
@@ -431,6 +484,38 @@ main {
         h1 {
             font-weight: bold;
             font-size: 48px;
+        }
+    }
+
+    .old-assignments-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .month {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+
+            h1 {
+                align-self: center;
+                font-weight: bold;
+
+                font-size: 3rem;
+            }
+
+            .day-container {
+                display: flex;
+                flex-direction: row;
+                gap: 0.75rem;
+
+                .day {
+                    padding: 1rem;
+
+                    border-radius: 12px;
+                    border: 2px solid oklch(37.2% 0.044 257.287); //oklch(27.9% 0.041 260.031) darker
+                }
+            }
         }
     }
 
@@ -472,10 +557,6 @@ main {
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
-
-                    &.strikethrough {
-                        text-decoration: line-through;
-                    }
                 }
             }
         }
