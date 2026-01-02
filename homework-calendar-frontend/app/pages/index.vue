@@ -254,7 +254,7 @@ onMounted(async () => {
         return
     }
 
-    assignments.value = assignmentsJson.data
+    assignments.value = assignmentsJson.data.sort((a, b) => b.completionDate! - a.completionDate!)
 
     const temp = assignmentsJson.data.filter(item => {
         if (new Date(item.dueDate).getMonth() !== today.getMonth()) {
@@ -279,7 +279,7 @@ onMounted(async () => {
             monthData.set(dueDate.getDate(), [item])
             return
         }
-        monthData.set(dueDate.getDate(), [...dateData, item])
+        monthData.set(dueDate.getDate(), [...dateData, item].sort((a, b) => b.completionDate! - a.completionDate!))
     })
 })
 </script>
@@ -446,8 +446,7 @@ onMounted(async () => {
                 </template>
 
                 <template #completed>
-                    <UCard v-for="work in assignments.sort((a, b) => b.completionDate! - a.completionDate!)"
-                        :key="work.id" v-show="work.completionDate !== null">
+                    <UCard v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null">
                         <h1>{{ work.title }}</h1>
                         <p class="desc">{{ work.description }}</p>
                         <br>
@@ -464,15 +463,13 @@ onMounted(async () => {
                 :title="'Assignments for ' + showAssignmentsForDayState.day">
 
                 <template #body>
-                    <UCard
-                        v-for="work in showAssignmentsForDayState.assignments.sort((a, b) => b.completionDate! - a.completionDate!)"
-                        :key="work.id">
+                    <UCard v-for="work in showAssignmentsForDayState.assignments" :key="work.id">
                         <h1>{{ work.title }}</h1>
                         <p class="desc">{{ work.description }}</p>
                         <br>
                         <p v-show="work.estimatedCompletionMinutes">Estimated time: {{
                             convertMinutesToFormattedString(work.estimatedCompletionMinutes)
-                        }}
+                            }}
                         </p>
                         <p>Date completed: {{ new Date(work.completionDate!).toLocaleDateString() }}</p>
                         <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
