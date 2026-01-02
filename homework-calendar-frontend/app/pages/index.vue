@@ -403,6 +403,10 @@ onMounted(async () => {
             </UContainer>
 
             <div class="calendar">
+                <header>
+                    <h1>{{ MONTHS[viewCalendarDate.month - 1] }}</h1>
+                </header>
+
                 <div class="weekday-headers">
                     <div v-for="day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" :key="day">
                         {{ day }}
@@ -593,6 +597,15 @@ main {
     }
 
     .calendar {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        header {
+            display: flex;
+            justify-content: center;
+        }
+
         .weekday-headers {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
