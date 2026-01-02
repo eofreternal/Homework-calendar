@@ -374,24 +374,31 @@ onMounted(async () => {
             </header>
 
             <UContainer class="old-assignments-container">
-                <div v-for="month in oldAssignments.keys()" class="month">
-                    <h1>{{ month }}</h1>
-                    <UContainer class="day-container">
-                        <template v-for="days in oldAssignments.get(month)" class="day">
-                            <div class="day" @click="() => showAssignmentsForDayFunc(days[0], days[1])">
-                                {{ days[0] }}
-                                <ul>
-                                    <li v-for="(item, index) in days[1]" v-show="index < 3" :key="index"
-                                        class="assignment" :class="{ 'strikethrough': item.completionDate !== null }">
-                                        {{ item.title }}
-                                    </li>
-                                    <li v-if="days[1].length > 3">
-                                        +{{ days[1].length - 3 }} more items
-                                    </li>
-                                </ul>
-                            </div>
-                        </template>
-                    </UContainer>
+                <div class="months">
+                    <h1 v-for="month in oldAssignments.keys()">{{ month }}</h1>
+                </div>
+
+                <div class="assignments">
+                    <template v-for="month in oldAssignments.keys()">
+                        <div class="month-assignment">
+                            <template v-for="days in oldAssignments.get(month)">
+                                <div class="day" @click="() => showAssignmentsForDayFunc(days[0], days[1])">
+                                    {{ days[0] }}
+                                    <ul>
+                                        <li v-for="(item, index) in days[1]" v-show="index < 3" :key="index"
+                                            class="assignment"
+                                            :class="{ 'strikethrough': item.completionDate !== null }">
+                                            {{ item.title }}
+                                        </li>
+                                        <li v-if="days[1].length > 3">
+                                            +{{ days[1].length - 3 }} more items
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </template>
+                        </div>
+                    </template>
                 </div>
             </UContainer>
 
@@ -527,13 +534,14 @@ main {
     }
 
     .old-assignments-container {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto;
         gap: 1rem;
 
-        .month {
-            display: flex;
-            flex-direction: row;
+        .months {
+            display: grid;
+            grid-template-rows: auto;
             gap: 1rem;
 
             h1 {
@@ -542,8 +550,14 @@ main {
 
                 font-size: 3rem;
             }
+        }
 
-            .day-container {
+        .assignments {
+            display: grid;
+            grid-template-rows: auto;
+            gap: 1rem;
+
+            .month-assignment {
                 display: flex;
                 flex-direction: row;
                 gap: 0.75rem;
