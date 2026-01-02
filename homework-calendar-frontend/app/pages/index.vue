@@ -9,6 +9,18 @@ import { CalendarDate } from '@internationalized/date'
 const userDataStore = useUserDataStore()
 const toast = useToast()
 
+const showAssignmentsForDayState = reactive<{
+    show: boolean,
+
+    day: number,
+    assignments: Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]
+}>({
+    show: false,
+
+    day: 0,
+    assignments: []
+})
+
 const oldAssignments = ref<Map<typeof MONTHS[number], Map<number, (Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"])>>>(new Map())
 const assignments = ref<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]>([])
 const showCreateClassModal = ref(false)
@@ -197,6 +209,13 @@ function convertMinutesToFormattedString(minutes: number) {
     return `${normalizedHours} hour${normalizedHours == 1 ? "" : "s"} and ${normalizedMinutes} minute${normalizedMinutes == 1 ? "" : "s"}`
 }
 
+function showAssignmentsForDayFunc(day: number, assignments: Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]) {
+    showAssignmentsForDayState.show = true
+
+    showAssignmentsForDayState.day = day
+    showAssignmentsForDayState.assignments = assignments
+}
+
 onMounted(async () => {
     toast.add({
         color: "info",
@@ -359,7 +378,7 @@ onMounted(async () => {
                     <h1>{{ month }}</h1>
                     <UContainer class="day-container">
                         <template v-for="days in oldAssignments.get(month)" class="day">
-                            <div class="day">
+                            <div class="day" @click="() => showAssignmentsForDayFunc(days[0], days[1])">
                                 {{ days[0] }}
                                 <ul>
                                     <li v-for="(item, index) in days[1]" v-show="index < 3" :key="index"
@@ -385,6 +404,7 @@ onMounted(async () => {
 
                 <div class="days-container">
                     <div class="day" v-for="day in calendarDays"
+                        @click="() => { if (day !== null) { showAssignmentsForDayFunc(day, getEventsForDay(today.getMonth(), day)) } }"
                         :class="{ 'has-assignments': getEventsForDay(today.getMonth(), day).length > 0, 'today': new Date().getDate() == day }">
                         {{ day }}
                         <ul>
@@ -439,6 +459,28 @@ onMounted(async () => {
                     </UCard>
                 </template>
             </UTabs>
+
+            <USlideover v-model:open="showAssignmentsForDayState.show"
+                :title="'Assignments for ' + showAssignmentsForDayState.day">
+
+                <template #body>
+                    <UCard
+                        v-for="work in showAssignmentsForDayState.assignments.sort((a, b) => b.completionDate! - a.completionDate!)"
+                        :key="work.id">
+                        <h1>{{ work.title }}</h1>
+                        <p class="desc">{{ work.description }}</p>
+                        <br>
+                        <p v-show="work.estimatedCompletionMinutes">Estimated time: {{
+                            convertMinutesToFormattedString(work.estimatedCompletionMinutes)
+                        }}
+                        </p>
+                        <p>Date completed: {{ new Date(work.completionDate!).toLocaleDateString() }}</p>
+                        <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
+                        <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
+                            work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
+                    </UCard>
+                </template>
+            </USlideover>
         </aside>
     </main>
 </template>
@@ -510,10 +552,30 @@ main {
                 gap: 0.75rem;
 
                 .day {
+                    box-sizing: border-box;
+
+                    padding: 0.5rem;
+                    min-height: 120px;
+                    width: 160px;
+                    max-width: 100%;
+
+                    border-radius: 8px;
+
+                    overflow: hidden;
+
                     padding: 1rem;
 
                     border-radius: 12px;
                     border: 2px solid oklch(37.2% 0.044 257.287); //oklch(27.9% 0.041 260.031) darker
+
+                    .assignment {
+                        font-size: 12px;
+
+                        max-width: 100%;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
                 }
             }
         }
