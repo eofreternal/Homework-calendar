@@ -247,7 +247,7 @@ onMounted(async () => {
 
     temp.forEach(item => {
         const dueDate = new Date(item.dueDate)
-        const assignmentDueMonth = MONTHS[dueDate.getMonth() - 1]!
+        const assignmentDueMonth = MONTHS[dueDate.getMonth()]!
         const monthData = oldAssignments.value.get(assignmentDueMonth)
 
         if (monthData === undefined) {
