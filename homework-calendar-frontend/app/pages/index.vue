@@ -474,19 +474,21 @@ onMounted(async () => {
                 :title="'Assignments for ' + showAssignmentsForDayState.day">
 
                 <template #body>
-                    <UCard v-for="work in showAssignmentsForDayState.assignments" :key="work.id">
-                        <h1>{{ work.title }}</h1>
-                        <p class="desc">{{ work.description }}</p>
-                        <br>
-                        <p v-show="work.estimatedCompletionMinutes">Estimated time: {{
-                            convertMinutesToFormattedString(work.estimatedCompletionMinutes)
-                            }}
-                        </p>
-                        <p>Date completed: {{ new Date(work.completionDate!).toLocaleDateString() }}</p>
-                        <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
-                        <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
-                            work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
-                    </UCard>
+                    <UContainer class="sliderover-container">
+                        <UCard v-for="work in showAssignmentsForDayState.assignments" :key="work.id">
+                            <h1>{{ work.title }}</h1>
+                            <p class="desc">{{ work.description }}</p>
+                            <br>
+                            <p v-show="work.estimatedCompletionMinutes">Estimated time: {{
+                                convertMinutesToFormattedString(work.estimatedCompletionMinutes)
+                                }}
+                            </p>
+                            <p>Date completed: {{ new Date(work.completionDate!).toLocaleDateString() }}</p>
+                            <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
+                            <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
+                                work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
+                        </UCard>
+                    </UContainer>
                 </template>
             </USlideover>
         </aside>
@@ -496,6 +498,11 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .strikethrough {
     text-decoration: line-through;
+}
+.sliderover-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .create-assignment-wrapper {
