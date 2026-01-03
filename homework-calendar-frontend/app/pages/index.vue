@@ -452,10 +452,8 @@ onMounted(async () => {
                             <h1>{{ work.title }}</h1>
                             <p class="desc">{{ work.description }}</p>
                             <br>
-                            <p v-show="work.estimatedCompletionMinutes">Estimated time: {{
-                                convertMinutesToFormattedString(work.estimatedCompletionMinutes)
-                                }}
-                            </p>
+                            <p v-show="work.estimatedCompletionMinutes">Estimated time:
+                                {{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
                             <p>Date completed: {{ new Date(work.completionDate!).toLocaleDateString() }}</p>
                             <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
                             <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
