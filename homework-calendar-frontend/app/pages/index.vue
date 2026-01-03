@@ -379,7 +379,7 @@ onMounted(async () => {
                     <template v-for="month in oldAssignments.keys()">
                         <div class="month-assignment">
                             <template v-for="days in oldAssignments.get(month)">
-                                <Assignment :day="days[0]" :assignments-for-day="days[1]"
+                                <Date :day="days[0]" :assignments-for-day="days[1]"
                                     :show-assignments-for-day-func="showAssignmentsForDayFunc" />
                             </template>
                         </div>
@@ -399,7 +399,7 @@ onMounted(async () => {
                 </div>
 
                 <div class="days-container">
-                    <Assignment v-for="day in calendarDays" :day="day"
+                    <Date v-for="day in calendarDays" :day="day"
                         :assignments-for-day="getEventsForDay(today.getMonth(), day)"
                         :show-assignments-for-day-func="showAssignmentsForDayFunc" />
                 </div>
