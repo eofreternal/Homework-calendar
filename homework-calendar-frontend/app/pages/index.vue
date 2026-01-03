@@ -288,10 +288,7 @@ onMounted(async () => {
     <main>
         <div>
             <header>
-                <h1>Calendar - Showing assigments for {{
-                    ["January", "February", "March", "April", "May", "June", "July",
-                        "August", "September", "October", "November", "December"].at(viewCalendarDate.month) }}
-                </h1>
+                <h1>Calendar - Showing assigments for {{ MONTHS.at(viewCalendarDate.month) }}</h1>
 
                 <UButton @click="showCreateAssignmentModal = true">Create assignment</UButton>
 
