@@ -35,7 +35,7 @@ const app = new Hono<{ Variables: SessionVariables }>()
     .use('*', sessionMiddleware({
         store,
         encryptionKey: 'zo5afLDEw@OvikeCRUDu-rUpr88h+4hl', // Required for CookieStore, recommended for others
-        expireAfterSeconds: 60 * 60 * 14, // Expire session after 14 days
+        expireAfterSeconds: 60 * 60 * 99999,
         cookieOptions: {
             sameSite: 'None', // Recommended for basic CSRF protection in modern browsers
             path: '/', // Required for this library to work properly
