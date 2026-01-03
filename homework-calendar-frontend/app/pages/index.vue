@@ -379,20 +379,8 @@ onMounted(async () => {
                     <template v-for="month in oldAssignments.keys()">
                         <div class="month-assignment">
                             <template v-for="days in oldAssignments.get(month)">
-                                <div class="day" @click="() => showAssignmentsForDayFunc(days[0], days[1])">
-                                    {{ days[0] }}
-                                    <ul>
-                                        <li v-for="(item, index) in days[1]" v-show="index < 3" :key="index"
-                                            class="assignment"
-                                            :class="{ 'strikethrough': item.completionDate !== null }">
-                                            {{ item.title }}
-                                        </li>
-                                        <li v-if="days[1].length > 3">
-                                            +{{ days[1].length - 3 }} more items
-                                        </li>
-                                    </ul>
-                                </div>
-
+                                <Assignment :day="days[0]" :assignments-for-day="days[1]"
+                                    :show-assignments-for-day-func="showAssignmentsForDayFunc" />
                             </template>
                         </div>
                     </template>
@@ -411,21 +399,9 @@ onMounted(async () => {
                 </div>
 
                 <div class="days-container">
-                    <div class="day" v-for="day in calendarDays"
-                        @click="() => { if (day !== null) { showAssignmentsForDayFunc(day, getEventsForDay(today.getMonth(), day)) } }"
-                        :class="{ 'has-assignments': getEventsForDay(today.getMonth(), day).length > 0, 'today': new Date().getDate() == day }">
-                        {{ day }}
-                        <ul>
-                            <li v-for="(item, index) in getEventsForDay(today.getMonth(), day)" v-show="index < 3"
-                                :key="index" class="assignment"
-                                :class="{ 'strikethrough': item.completionDate !== null }">
-                                {{ item.title }}
-                            </li>
-                            <li v-if="getEventsForDay(today.getMonth(), day).length > 3">
-                                +{{ getEventsForDay(today.getMonth(), day).length - 3 }} more items
-                            </li>
-                        </ul>
-                    </div>
+                    <Assignment v-for="day in calendarDays" :day="day"
+                        :assignments-for-day="getEventsForDay(today.getMonth(), day)"
+                        :show-assignments-for-day-func="showAssignmentsForDayFunc" />
                 </div>
             </div>
         </div>
@@ -493,9 +469,6 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.strikethrough {
-    text-decoration: line-through;
-}
 .sliderover-container {
     display: flex;
     flex-direction: column;
@@ -569,33 +542,6 @@ main {
                 display: flex;
                 flex-direction: row;
                 gap: 0.75rem;
-
-                .day {
-                    box-sizing: border-box;
-
-                    padding: 0.5rem;
-                    min-height: 120px;
-                    width: 160px;
-                    max-width: 100%;
-
-                    border-radius: 8px;
-
-                    overflow: hidden;
-
-                    padding: 1rem;
-
-                    border-radius: 12px;
-                    border: 2px solid oklch(37.2% 0.044 257.287); //oklch(27.9% 0.041 260.031) darker
-
-                    .assignment {
-                        font-size: 12px;
-
-                        max-width: 100%;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                    }
-                }
             }
         }
     }
@@ -620,35 +566,6 @@ main {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
-
-            .day {
-                box-sizing: border-box;
-
-                padding: 0.5rem;
-                min-height: 120px;
-                max-width: 100%;
-
-                border-radius: 8px;
-
-                overflow: hidden;
-
-                &.has-assignments {
-                    border: 3px solid var(--ui-primary);
-                }
-
-                &.today {
-                    border: 3px solid white;
-                }
-
-                .assignment {
-                    font-size: 12px;
-
-                    max-width: 100%;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-            }
         }
     }
 
