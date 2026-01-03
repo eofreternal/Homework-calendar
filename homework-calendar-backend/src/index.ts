@@ -34,8 +34,7 @@ const app = new Hono<{ Variables: SessionVariables }>()
     }))
     .use('*', sessionMiddleware({
         store,
-        //TODO: add a proper password
-        encryptionKey: 'password_at_least_32_characters_long', // Required for CookieStore, recommended for others
+        encryptionKey: 'zo5afLDEw@OvikeCRUDu-rUpr88h+4hl', // Required for CookieStore, recommended for others
         expireAfterSeconds: 60 * 60 * 14, // Expire session after 14 days
         cookieOptions: {
             sameSite: 'None', // Recommended for basic CSRF protection in modern browsers
