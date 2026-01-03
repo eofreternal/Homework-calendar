@@ -194,21 +194,6 @@ async function onSubmitCreateClass(event: FormSubmitEvent<createClassSchema>) {
     showCreateClassModal.value = false
 }
 
-function convertMinutesToFormattedString(minutes: number) {
-    const normalizedHours = Math.floor(minutes / 60)
-    const normalizedMinutes = minutes % 60
-
-    if (normalizedHours < 1) {
-        return `${normalizedMinutes} minute${normalizedMinutes == 1 ? "" : "s"}`
-    }
-
-    if (normalizedMinutes < 1) {
-        return `${normalizedHours} hour${normalizedHours == 1 ? "" : "s"}`
-    }
-
-    return `${normalizedHours} hour${normalizedHours == 1 ? "" : "s"} and ${normalizedMinutes} minute${normalizedMinutes == 1 ? "" : "s"}`
-}
-
 function showAssignmentsForDayFunc(day: number, assignments: Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]) {
     showAssignmentsForDayState.show = true
 
@@ -417,29 +402,15 @@ onMounted(async () => {
                     slot: 'completed'
                 }
             ]">
+                <!-- Add gap between the assignments for both of these 2 -->
                 <template #uncompleted>
-                    <UCard v-for="work in assignments" :key="work.id" v-show="work.completionDate == null">
-                        <h1>{{ work.title }}</h1>
-                        <p class="desc">{{ work.description }}</p>
-                        <br>
-                        <p>Estimated time: {{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
-                        <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
-                        <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
-                            work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
-                    </UCard>
+                    <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate == null"
+                        :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
                 </template>
 
                 <template #completed>
-                    <UCard v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null">
-                        <h1>{{ work.title }}</h1>
-                        <p class="desc">{{ work.description }}</p>
-                        <br>
-                        <p>Estimated time: {{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
-                        <p>Date completed: {{ new Date(work.completionDate!).toLocaleDateString() }}</p>
-                        <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
-                        <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
-                            work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
-                    </UCard>
+                    <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null"
+                        :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
                 </template>
             </UTabs>
 
@@ -447,19 +418,9 @@ onMounted(async () => {
                 :title="'Assignments for ' + showAssignmentsForDayState.day">
 
                 <template #body>
-                    <UContainer class="sliderover-container">
-                        <UCard v-for="work in showAssignmentsForDayState.assignments" :key="work.id">
-                            <h1>{{ work.title }}</h1>
-                            <p class="desc">{{ work.description }}</p>
-                            <br>
-                            <p v-show="work.estimatedCompletionMinutes">Estimated time:
-                                {{ convertMinutesToFormattedString(work.estimatedCompletionMinutes) }}</p>
-                            <p>Date completed: {{ new Date(work.completionDate!).toLocaleDateString() }}</p>
-                            <p>Due Date: {{ new Date(work.dueDate).toLocaleDateString() }}</p>
-                            <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
-                                work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
-                        </UCard>
                     <UContainer class="slideover-container">
+                        <Assignment v-for="work in assignments" :key="work.id" :assignment="work"
+                            :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
                     </UContainer>
                 </template>
             </USlideover>
