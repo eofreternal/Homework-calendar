@@ -459,6 +459,7 @@ onMounted(async () => {
                             <UButton loading-auto @click="toggleAssignmentAsCompleted(work.id)">{{
                                 work.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
                         </UCard>
+                    <UContainer class="slideover-container">
                     </UContainer>
                 </template>
             </USlideover>
@@ -467,7 +468,7 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.sliderover-container {
+.slideover-container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
