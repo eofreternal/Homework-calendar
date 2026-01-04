@@ -402,15 +402,19 @@ onMounted(async () => {
                     slot: 'completed'
                 }
             ]">
-                <!-- Add gap between the assignments for both of these 2 -->
+
                 <template #uncompleted>
-                    <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate == null"
-                        :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
+                    <div class="flex flex-col gap-4">
+                        <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate == null"
+                            :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
+                    </div>
                 </template>
 
                 <template #completed>
-                    <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null"
-                        :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
+                    <div class="flex flex-col gap-4">
+                        <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null"
+                            :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
+                    </div>
                 </template>
             </UTabs>
 
