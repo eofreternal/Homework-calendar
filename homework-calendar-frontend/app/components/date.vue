@@ -2,24 +2,38 @@
 import { client } from '~/utils';
 import type { InferResponseType } from 'hono';
 
+const emit = defineEmits<{
+    (event: 'showAssignmentsForDay', day: number, assignments: Extract<
+        InferResponseType<typeof client.assignment["$get"]>,
+        { success: true }
+    >["data"]): void;
+}>();
+
 const props = defineProps<{
     day: number | null,
     assignmentsForDay: Extract<
         InferResponseType<typeof client.assignment["$get"]>,
         { success: true }
-    >["data"],
-
-    showAssignmentsForDayFunc: (day: number, assignments: Extract<
-        InferResponseType<typeof client.assignment["$get"]>,
-        { success: true }
-    >["data"]) => void
+    >["data"]
 }>()
+
+function onClick() {
+    if (props.day !== null) {
+        emit("showAssignmentsForDay", props.day, props.assignmentsForDay)
+    }
+}
+
+const hasIncomplete = computed(
+    () => props.assignmentsForDay.some(a => a.completionDate == null)
+)
+
+const isToday = computed(
+    () => props.day !== null && new Date().getDate() === props.day
+)
 </script>
 
 <template>
-    <div class="day"
-        @click="() => { if (props.day !== null) { showAssignmentsForDayFunc(props.day, props.assignmentsForDay) } }"
-        :class="{ 'has-assignments': props.assignmentsForDay.filter(item => item.completionDate == null).length > 0, 'today': new Date().getDate() == props.day }">
+    <div class="day" @click="onClick" :class="{ 'has-assignments': hasIncomplete, 'today': isToday }">
         {{ props.day }}
 
         <ul>

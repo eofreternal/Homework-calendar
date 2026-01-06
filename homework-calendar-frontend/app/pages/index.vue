@@ -365,7 +365,7 @@ onMounted(async () => {
                         <div class="month-assignment">
                             <template v-for="days in oldAssignments.get(month)">
                                 <Date :day="days[0]" :assignments-for-day="days[1]"
-                                    :show-assignments-for-day-func="showAssignmentsForDayFunc" />
+                                    @show-assignments-for-day="showAssignmentsForDayFunc" />
                             </template>
                         </div>
                     </template>
@@ -386,7 +386,7 @@ onMounted(async () => {
                 <div class="days-container">
                     <Date v-for="day in calendarDays" :day="day"
                         :assignments-for-day="getEventsForDay(today.getMonth(), day)"
-                        :show-assignments-for-day-func="showAssignmentsForDayFunc" />
+                        @show-assignments-for-day="showAssignmentsForDayFunc" />
                 </div>
             </div>
         </div>
@@ -406,14 +406,14 @@ onMounted(async () => {
                 <template #uncompleted>
                     <div class="flex flex-col gap-4">
                         <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate == null"
-                            :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
+                            :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                     </div>
                 </template>
 
                 <template #completed>
                     <div class="flex flex-col gap-4">
                         <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null"
-                            :assignment="work" :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
+                            :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                     </div>
                 </template>
             </UTabs>
@@ -424,7 +424,7 @@ onMounted(async () => {
                 <template #body>
                     <UContainer class="slideover-container">
                         <Assignment v-for="work in assignments" :key="work.id" :assignment="work"
-                            :toggle-assignment-as-completed-func="toggleAssignmentAsCompleted" />
+                            @toggle-assignment="toggleAssignmentAsCompleted(work.id)" />
                     </UContainer>
                 </template>
             </USlideover>

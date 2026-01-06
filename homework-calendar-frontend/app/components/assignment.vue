@@ -2,9 +2,13 @@
 import { client } from '~/utils';
 import type { InferResponseType } from 'hono';
 
+const emit = defineEmits<{
+    (event: 'toggleAssignment', day: number): void;
+}>();
+
+
 const props = defineProps<{
-    assignment: Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"][number],
-    toggleAssignmentAsCompletedFunc: (id: number) => void
+    assignment: Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"][number]
 }>()
 
 function convertMinutesToFormattedString(minutes: number) {
@@ -32,7 +36,7 @@ function convertMinutesToFormattedString(minutes: number) {
         <p v-if="props.assignment.completionDate !== null">Date completed: {{ new
             Date(props.assignment.completionDate).toLocaleDateString() }}</p>
         <p>Due Date: {{ new Date(props.assignment.dueDate).toLocaleDateString() }}</p>
-        <UButton loading-auto @click="() => toggleAssignmentAsCompletedFunc(props.assignment.id)">{{
+        <UButton loading-auto @click="emit('toggleAssignment', props.assignment.id)">{{
             props.assignment.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
     </UCard>
 </template>
