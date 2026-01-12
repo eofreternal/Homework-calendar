@@ -54,16 +54,23 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
             )
         )
 
-        const completedAssignments = await db.select().from(schema.assignmentsTable).where(
+        const currentMonthStart = Date.parse(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toLocaleDateString())
+        const assignmentsInCurrentMonth = await db.select().from(schema.assignmentsTable).where(
             and(
+                and(
+                    and(
+                        gt(schema.assignmentsTable.dueDate, currentMonthStart),
+                        lt(schema.assignmentsTable.dueDate, end),
+                    ),
+                    isNotNull(schema.assignmentsTable.completionDate)
+                ),
                 eq(schema.assignmentsTable.owner, userData.id),
-                isNotNull(schema.assignmentsTable.completionDate)
             )
-        ).limit(10).orderBy(desc(schema.assignmentsTable.completionDate));
+        ).orderBy(desc(schema.assignmentsTable.completionDate));
 
         return c.json({
             success: true,
-            data: [...uncompletedAssignments, ...completedAssignments]
+            data: [...uncompletedAssignments, ...assignmentsInCurrentMonth]
         } as const)
     })
     .post("/", zValidator("json", z.object({
