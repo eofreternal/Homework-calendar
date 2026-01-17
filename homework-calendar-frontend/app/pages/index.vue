@@ -5,10 +5,10 @@ import type { InferResponseType } from 'hono';
 import type { FormSubmitEvent } from '@nuxt/ui'
 import z from 'zod';
 import { CalendarDate } from '@internationalized/date'
+import { UPopover } from '#components'
 
 const userDataStore = useUserDataStore()
 const toast = useToast()
-
 const showAssignmentsForDayState = reactive<{
     show: boolean,
 
@@ -21,13 +21,17 @@ const showAssignmentsForDayState = reactive<{
     assignments: []
 })
 
+const today = new Date()
+const pageWidth = ref(0)
+const mobileShowUpcomingAssignmentsSidebar = ref(false)
+const mobileCurrentDate = shallowRef(new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate()))
+
 const oldAssignments = ref<Map<typeof MONTHS[number], Map<number, (Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"])>>>(new Map())
 const assignments = ref<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]>([])
 const showCreateClassModal = ref(false)
 const showCreateAssignmentModal = ref(false)
 const classes = ref<Extract<InferResponseType<typeof client.assignment.classes["$post"]>, { success: true }>["data"][]>([])
 
-const today = new Date()
 const oneDayInTheFuture = new Date()
 oneDayInTheFuture.setDate(oneDayInTheFuture.getDate() + 1);
 const createAssignmentStartDate = shallowRef(new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate()))
@@ -202,6 +206,11 @@ function showAssignmentsForDayFunc(day: number, assignments: Extract<InferRespon
 }
 
 onMounted(async () => {
+    pageWidth.value = window.innerWidth
+    window.addEventListener('resize', function () {
+        pageWidth.value = window.innerWidth
+    });
+
     toast.add({
         color: "info",
         title: "Logging in..."
@@ -355,24 +364,44 @@ onMounted(async () => {
                 </UModal>
             </header>
 
+            <h1>Unfinished assignments from previous months</h1>
             <UContainer class="old-assignments-container">
-                <div class="months">
-                    <h1 v-for="month in oldAssignments.keys()">{{ month }}</h1>
-                </div>
+                <template v-if="pageWidth > 1000">
+                    <div class="months">
+                        <h1 v-for="month in oldAssignments.keys()">{{ month }}</h1>
+                    </div>
 
-                <div class="assignments">
-                    <template v-for="month in oldAssignments.keys()">
-                        <div class="month-assignment">
-                            <template v-for="days in oldAssignments.get(month)">
-                                <Date :day="days[0]" :assignments-for-day="days[1]"
-                                    @show-assignments-for-day="showAssignmentsForDayFunc" />
-                            </template>
-                        </div>
+                    <div class="assignments">
+                        <template v-for="month in oldAssignments.keys()">
+                            <div class="month-assignment">
+                                <template v-for="days in oldAssignments.get(month)">
+                                    <Date :day="days[0]" :assignments-for-day="days[1]"
+                                        @show-assignments-for-day="showAssignmentsForDayFunc" />
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <UPopover v-else class="assignments" v-for="monthName in oldAssignments.keys()">
+                    <UButton color="neutral" variant="subtle" class="monthName">
+                        <h1>{{ monthName }}</h1>
+                    </UButton>
+                    <template #content>
+                        <template v-for="month in oldAssignments.keys()">
+                            <div class="month-assignment">
+                                <template v-for="days in oldAssignments.get(month)">
+                                    <Date :day="days[0]" :assignments-for-day="days[1]"
+                                        @show-assignments-for-day="showAssignmentsForDayFunc" />
+                                </template>
+                            </div>
+                        </template>
                     </template>
-                </div>
+                </UPopover>
             </UContainer>
 
-            <div class="calendar">
+            <!-- TODO: use HTML tables for better a11y -->
+            <div class="desktop-calendar" v-if="pageWidth >= 1000">
                 <header>
                     <h1>{{ MONTHS[viewCalendarDate.month - 1] }}</h1>
                 </header>
@@ -389,9 +418,41 @@ onMounted(async () => {
                         @show-assignments-for-day="showAssignmentsForDayFunc" />
                 </div>
             </div>
+
+            <div class="mobile-calendar" v-else>
+                <!-- Needed for the month watcher. Using the built in month controls don't work because they don't automatically choose a day in the month for you -->
+                <UCalendar :month-controls="false" :year-controls="false" v-model="mobileCurrentDate" size="lg">
+                    <template #day="{ day }">
+                        <UChip :show="getEventsForDay(day.month, day.day).length > 0" color="success" size="2xs">
+                            {{ day.day }}
+                        </UChip>
+                    </template>
+                </UCalendar>
+                <div class="flex justify-between gap-4">
+                    <UButton color="neutral" variant="outline"
+                        @click="mobileCurrentDate = mobileCurrentDate.subtract({ months: 1 })">
+                        Prev
+                    </UButton>
+
+                    <UButton color="neutral" variant="outline"
+                        @click="mobileCurrentDate = mobileCurrentDate.add({ months: 1 })">
+                        Next
+                    </UButton>
+                </div>
+
+                <div>
+                    <template v-for="work in getEventsForDay(mobileCurrentDate.month - 1, mobileCurrentDate.day)">
+                        <Assignment :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
+                    </template>
+                </div>
+            </div>
         </div>
 
-        <aside>
+        <UButton class="toggle-sidebar"
+            @click="mobileShowUpcomingAssignmentsSidebar = !mobileShowUpcomingAssignmentsSidebar"
+            icon="material-symbols:assignment-outline" v-if="pageWidth < 1000" />
+        <aside :class="{ 'mobile': (pageWidth < 1000) }"
+            v-show="(pageWidth > 1000) || mobileShowUpcomingAssignmentsSidebar">
             <UTabs :items="[
                 {
                     label: 'Uncompleted',
@@ -417,20 +478,27 @@ onMounted(async () => {
                     </div>
                 </template>
             </UTabs>
-
-            <USlideover v-model:open="showAssignmentsForDayState.show"
-                :title="'Assignments for ' + showAssignmentsForDayState.day">
-
-                <template #body>
-                    <UContainer class="slideover-container">
-                        <Assignment v-for="work in assignments" :key="work.id" :assignment="work"
-                            @toggle-assignment="toggleAssignmentAsCompleted(work.id)" />
-                    </UContainer>
-                </template>
-            </USlideover>
         </aside>
+
+        <USlideover v-model:open="showAssignmentsForDayState.show"
+            :title="'Assignments for ' + showAssignmentsForDayState.day">
+
+            <template #body>
+                <UContainer class="slideover-container">
+                    <Assignment v-for="work in assignments" :key="work.id" :assignment="work"
+                        @toggle-assignment="toggleAssignmentAsCompleted(work.id)" />
+                </UContainer>
+            </template>
+        </USlideover>
     </main>
 </template>
+
+
+<style>
+.monthName {
+    width: fit-content;
+}
+</style>
 
 <style lang="scss" scoped>
 .slideover-container {
@@ -469,7 +537,7 @@ main {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    padding-top: 2rem;
+    padding: 2rem;
 
     header {
         h1 {
@@ -510,7 +578,7 @@ main {
         }
     }
 
-    .calendar {
+    .desktop-calendar {
         display: flex;
         flex-direction: column;
         gap: 1rem;
@@ -533,16 +601,32 @@ main {
         }
     }
 
+    .toggle-sidebar {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+
+        z-index: 999;
+    }
+
     aside {
         display: flex;
         flex-direction: column;
         gap: 1rem;
 
+        top: 0px;
         width: 16rem;
+        background: var(--ui-bg);
 
         .desc {
             color: grey;
             font-size: 16px;
+        }
+
+        &.mobile {
+            position: absolute;
+            width: 100%;
+            height: 100%;
         }
     }
 }
