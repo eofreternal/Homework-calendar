@@ -30,7 +30,7 @@ const oldAssignments = ref<Map<typeof MONTHS[number], Map<number, (Extract<Infer
 const assignments = ref<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]>([])
 const showCreateClassModal = ref(false)
 const showCreateAssignmentModal = ref(false)
-const classes = ref<Extract<InferResponseType<typeof client.assignment.classes["$post"]>, { success: true }>["data"][]>([])
+const classes = ref<Extract<InferResponseType<typeof client.classes["$post"]>, { success: true }>["data"][]>([])
 
 const oneDayInTheFuture = new Date()
 oneDayInTheFuture.setDate(oneDayInTheFuture.getDate() + 1);
@@ -188,7 +188,7 @@ async function toggleAssignmentAsCompleted(id: number) {
 }
 
 async function onSubmitCreateClass(event: FormSubmitEvent<createClassSchema>) {
-    const request = await client.assignment.classes.$post({
+    const request = await client.classes.$post({
         json: {
             name: event.data.name
         }

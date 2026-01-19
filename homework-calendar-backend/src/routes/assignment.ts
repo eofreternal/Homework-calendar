@@ -6,27 +6,6 @@ import * as schema from "../db/schema"
 import * as z from "zod"
 
 export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
-    .get("/classes", async (c) => {
-        const classes = await db.select({ id: schema.classesTable.id, name: schema.classesTable.name }).from(schema.classesTable)
-            .where(isNull(schema.classesTable.archiveDate))
-        return c.json({ success: true, data: classes } as const, 200)
-    })
-    .post("/classes", zValidator("json", z.object({
-        name: z.string(),
-    })), authentication, async (c) => {
-        const userData = c.get("userData")
-        const body = c.req.valid("json")
-
-        const [data] = await db.insert(schema.classesTable).values({
-            name: body.name,
-            owner: userData.id,
-
-            creationDate: Date.now()
-        }).returning({ id: schema.classesTable.id, name: schema.classesTable.name })
-
-        return c.json({ success: true, data: data! } as const, 200)
-    })
-
     .get("/", zValidator("query", z.object({
         startDate: z.string().optional(),
         endDate: z.string()

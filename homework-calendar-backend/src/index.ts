@@ -12,6 +12,7 @@ import { type SessionVariables } from './middleware';
 import { db } from "./db/index"
 
 import { assignmentRoutes } from './routes/assignment'
+import { classesRoutes } from './routes/classes'
 import { authRoutes } from './routes/auth'
 
 const store = new CookieStore()
@@ -45,6 +46,7 @@ const app = new Hono<{ Variables: SessionVariables }>()
     }))
     .route("/auth", authRoutes)
     .route("/assignment", assignmentRoutes)
+    .route("/classes", classesRoutes)
 
 export default {
     port: 5000,
