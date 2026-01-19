@@ -432,7 +432,8 @@ onMounted(async () => {
 
             <div class="mobile-calendar" v-else>
                 <!-- Needed for the month watcher. Using the built in month controls don't work because they don't automatically choose a day in the month for you -->
-                <UCalendar :month-controls="false" :year-controls="false" v-model="mobileCurrentDate" size="lg">
+                <UCalendar :month-controls="false" :year-controls="false" v-model="mobileCurrentDate" size="lg"
+                    variant="subtle">
                     <template #day="{ day }">
                         <UChip :show="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined"
                             :color="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined ? 'success' : undefined"
