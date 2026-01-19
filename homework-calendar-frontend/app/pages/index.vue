@@ -76,19 +76,30 @@ const calendarDays = computed(() => {
 
     return days
 })
+const eventsForDate = computed(() => {
+    const events = new Map<number, Map<number, (typeof assignments.value[number])[]>>()
 
-function getEventsForDay(month: number, day: number | null) {
-    if (day == null) {
-        return []
+    for (const event of assignments.value) {
+        const dueDate = new Date(event.dueDate)
+
+        const month = dueDate.getMonth()
+        const date = dueDate.getDate()
+
+        const currentMonthValue = events.get(month)
+        if (currentMonthValue === undefined) {
+            events.set(month, new Map())
+        } else {
+            const currentDateValue = currentMonthValue.get(date)
+            if (currentDateValue === undefined) {
+                currentMonthValue.set(date, [event])
+            } else {
+                currentMonthValue.set(date, [...currentDateValue, event])
+            }
+        }
     }
 
-    return assignments.value.filter(d => {
-        const dueDate = new Date(d.dueDate)
-        if (dueDate.getDate() == day && dueDate.getMonth() == month) {
-            return true
-        }
-    })
-}
+    return events
+})
 
 function findClassIdByClassName(name: string) {
     if (name == "No Class") {
@@ -414,7 +425,7 @@ onMounted(async () => {
 
                 <div class="days-container">
                     <Date v-for="day in calendarDays" :day="day"
-                        :assignments-for-day="getEventsForDay(today.getMonth(), day)"
+                        :assignments-for-day="eventsForDate.get(today.getMonth())?.get(day) ?? []"
                         @show-assignments-for-day="showAssignmentsForDayFunc" />
                 </div>
             </div>
@@ -423,7 +434,9 @@ onMounted(async () => {
                 <!-- Needed for the month watcher. Using the built in month controls don't work because they don't automatically choose a day in the month for you -->
                 <UCalendar :month-controls="false" :year-controls="false" v-model="mobileCurrentDate" size="lg">
                     <template #day="{ day }">
-                        <UChip :show="getEventsForDay(day.month, day.day).length > 0" color="success" size="2xs">
+                        <UChip :show="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined"
+                            :color="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined ? 'success' : undefined"
+                            size="2xs">
                             {{ day.day }}
                         </UChip>
                     </template>
@@ -441,7 +454,8 @@ onMounted(async () => {
                 </div>
 
                 <div>
-                    <template v-for="work in getEventsForDay(mobileCurrentDate.month - 1, mobileCurrentDate.day)">
+                    <template
+                        v-for="work in eventsForDate.get(mobileCurrentDate.month - 1)?.get(mobileCurrentDate.day) ?? []">
                         <Assignment :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                     </template>
                 </div>
