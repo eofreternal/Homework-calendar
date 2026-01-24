@@ -144,7 +144,6 @@ async function onSubmitCreateAssignment(event: FormSubmitEvent<createAssignmentS
         description: "Hurray!!!"
     })
     assignments.value.push(response.data)
-    showCreateAssignmentModal.value = false
     return
 }
 
