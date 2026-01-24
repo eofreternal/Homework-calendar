@@ -48,15 +48,16 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
         return c.json({ success: true, data: updatedClass } as const)
     })
 
-    .delete("/:id", zValidator("query", z.object({
-        id: z.number()
-    })), authentication, async (c) => {
+    .delete("/:id", authentication, async (c) => {
         const userData = c.get("userData")
-        const url = c.req.valid("query")
+        const id = parseInt(c.req.param('id'))
+        if (isNaN(id)) {
+            return c.json({ success: true, data: "ID must be a number" } as const)
+        }
 
         const [deletedClass] = await db.delete(schema.classesTable).where(and(
-            eq(schema.usersTable.id, userData.id),
-            eq(schema.classesTable.id, url.id)
+            eq(schema.classesTable.owner, userData.id),
+            eq(schema.classesTable.id, id)
         )).returning()
 
         return c.json({ success: true, data: deletedClass } as const)
