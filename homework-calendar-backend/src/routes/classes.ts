@@ -29,20 +29,21 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
         return c.json({ success: true, data: data! } as const, 200)
     })
 
-    .patch("/:id", zValidator("query", z.object({
-        id: z.number()
-    })), zValidator("json", z.object({
+    .patch("/:id", zValidator("json", z.object({
         name: z.string().optional(),
 
         archiveDate: z.number().optional(),
     })), authentication, async (c) => {
         const userData = c.get("userData")
         const body = c.req.valid("json")
-        const url = c.req.valid("query")
+        const id = parseInt(c.req.param('id'))
+        if (isNaN(id)) {
+            return c.json({ success: true, data: "ID must be a number" } as const)
+        }
 
         const [updatedClass] = await db.update(schema.classesTable).set(body).where(and(
-            eq(schema.usersTable.id, userData.id),
-            eq(schema.classesTable.id, url.id)
+            eq(schema.classesTable.owner, userData.id),
+            eq(schema.classesTable.id, id)
         )).returning()
 
         return c.json({ success: true, data: updatedClass } as const)
