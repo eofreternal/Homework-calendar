@@ -500,7 +500,7 @@ onMounted(async () => {
 
             <template #body>
                 <UContainer class="slideover-container">
-                    <Assignment v-for="work in assignments" :key="work.id" :assignment="work"
+                    <Assignment v-for="work in showAssignmentsForDayState.assignments" :key="work.id" :assignment="work"
                         @toggle-assignment="toggleAssignmentAsCompleted(work.id)" />
                 </UContainer>
             </template>
