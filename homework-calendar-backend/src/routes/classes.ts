@@ -9,7 +9,6 @@ import * as z from "zod"
 export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
     .get("/", async (c) => {
         const classes = await db.select().from(schema.classesTable)
-            .where(isNull(schema.classesTable.archiveDate))
         return c.json({ success: true, data: classes } as const, 200)
     })
 
