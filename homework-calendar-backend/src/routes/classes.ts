@@ -31,7 +31,7 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
     .patch("/:id", zValidator("json", z.object({
         name: z.string().optional(),
 
-        archiveDate: z.number().optional(),
+        archiveDate: z.number().nullable().optional(),
     })), authentication, async (c) => {
         const userData = c.get("userData")
         const body = c.req.valid("json")
