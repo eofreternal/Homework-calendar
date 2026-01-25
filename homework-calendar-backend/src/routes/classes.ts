@@ -45,6 +45,10 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
             eq(schema.classesTable.id, id)
         )).returning()
 
+        if (updatedClass === undefined) {
+            return c.json({ success: false, data: "Class not found or it doesn't belong to you" })
+        }
+
         return c.json({ success: true, data: updatedClass } as const)
     })
 
@@ -59,6 +63,10 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
             eq(schema.classesTable.owner, userData.id),
             eq(schema.classesTable.id, id)
         )).returning()
+
+        if (deletedClass === undefined) {
+            return c.json({ success: false, data: "Class not found or it doesn't belong to you" })
+        }
 
         return c.json({ success: true, data: deletedClass } as const)
     })
