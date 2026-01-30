@@ -1,7 +1,7 @@
 
 import { Hono } from 'hono'
 import { authentication, zValidator, type SessionVariables } from './../middleware';
-import { eq, and, isNull } from "drizzle-orm"
+import { eq, and, desc } from "drizzle-orm"
 import { db } from "../db/index"
 import * as schema from "../db/schema"
 import * as z from "zod"
@@ -26,6 +26,32 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
         }).returning({ id: schema.classesTable.id, name: schema.classesTable.name })
 
         return c.json({ success: true, data: data! } as const, 200)
+    })
+
+    .get("/:id", zValidator("param", z.object({
+        page: z.number().default(0)
+    })), async (c) => {
+        const params = c.req.valid("param")
+        const id = parseInt(c.req.param('id'))
+        if (isNaN(id)) {
+            return c.json({ success: false, data: "ID must be a number" } as const)
+        }
+
+        const [fetchedClass] = await db.select().from(schema.classesTable).where(eq(schema.classesTable.id, id))
+        if (fetchedClass == undefined) {
+            return c.json({
+                success: false, data: `No class exists under the id ${id}`
+            } as const, 200)
+        }
+        const assignments = await db.select().from(schema.assignmentsTable).where(eq(schema.assignmentsTable.class, id)).orderBy(desc(schema.assignmentsTable.dueDate)).offset(params.page * 10).limit(10)
+
+        return c.json({
+            success: true as const,
+            data: {
+                ...fetchedClass,
+                assignments: assignments
+            }
+        }, 200)
     })
 
     .patch("/:id", zValidator("json", z.object({
