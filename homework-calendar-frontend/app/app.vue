@@ -4,10 +4,10 @@
 
 <template>
   <UApp>
-    <UMain>
-      <NuxtLayout>
+    <NuxtLayout>
+      <UMain>
         <NuxtPage />
-      </NuxtLayout>
-    </UMain>
+      </UMain>
+    </NuxtLayout>
   </UApp>
 </template>
