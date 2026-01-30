@@ -29,7 +29,7 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
     })
 
     .get("/:id", zValidator("param", z.object({
-        page: z.number().default(0)
+        page: z.number().default(1)
     })), async (c) => {
         const params = c.req.valid("param")
         const id = parseInt(c.req.param('id'))
@@ -43,7 +43,7 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
                 success: false, data: `No class exists under the id ${id}`
             } as const, 200)
         }
-        const assignments = await db.select().from(schema.assignmentsTable).where(eq(schema.assignmentsTable.class, id)).orderBy(desc(schema.assignmentsTable.dueDate)).offset(params.page * 10).limit(10)
+        const assignments = await db.select().from(schema.assignmentsTable).where(eq(schema.assignmentsTable.class, id)).orderBy(desc(schema.assignmentsTable.dueDate)).offset((params.page - 1) * 10).limit(10)
 
         return c.json({
             success: true as const,
