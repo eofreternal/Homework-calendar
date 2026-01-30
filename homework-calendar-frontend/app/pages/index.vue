@@ -285,6 +285,10 @@ onMounted(async () => {
         }
         monthData.set(dueDate.getDate(), [...dateData, item].sort((a, b) => b.completionDate! - a.completionDate!))
     })
+
+    const classesRequest = await client.classes.$get()
+    const classesJson = await classesRequest.json()
+    classes.value = classesJson.data
 })
 </script>
 
