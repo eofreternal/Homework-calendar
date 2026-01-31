@@ -1,2 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+:root {
+    --navbar-height: 94px;
+}

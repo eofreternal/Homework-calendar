@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 </script>
 
 <template>
@@ -14,6 +13,7 @@ nav {
     display: flex;
     flex-direction: row;
     gap: 2rem;
+    height: var(--navbar-height);
 
     padding: 1.5rem;
 

@@ -479,16 +479,18 @@ onMounted(async () => {
                     slot: 'completed'
                 }
             ]">
-
+                <!-- subtract 2rem for the padding added to the top of the main element, subtract 3rem for the top + bottom padding added to the navbar -->
                 <template #uncompleted>
-                    <div class="flex flex-col gap-4">
+                    <div
+                        class="flex flex-col gap-4 max-h-[calc(100dvh-var(--navbar-height)-2rem-3rem)] overflow-y-scroll">
                         <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate == null"
                             :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                     </div>
                 </template>
 
                 <template #completed>
-                    <div class="flex flex-col gap-4">
+                    <div
+                        class="flex flex-col gap-4 max-h-[calc(100dvh-var(--navbar-height)-2rem-3rem)] overflow-y-scroll">
                         <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null"
                             :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                     </div>
@@ -553,7 +555,7 @@ main {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    padding: 2rem;
+    padding-top: 2rem;
 
     header {
         h1 {
