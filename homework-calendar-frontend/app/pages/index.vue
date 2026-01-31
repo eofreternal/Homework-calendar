@@ -30,7 +30,7 @@ const oldAssignments = ref<Map<typeof MONTHS[number], Map<number, (Extract<Infer
 const assignments = ref<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"]>([])
 const showCreateClassModal = ref(false)
 const showCreateAssignmentModal = ref(false)
-const classes = ref<Extract<InferResponseType<typeof client.classes["$post"]>, { success: true }>["data"][]>([])
+const classes = ref<Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"]>([])
 
 const oneDayInTheFuture = new Date()
 oneDayInTheFuture.setDate(oneDayInTheFuture.getDate() + 1);
