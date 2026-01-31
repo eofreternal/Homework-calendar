@@ -31,7 +31,7 @@ export const zValidator = <
     return baseZodValidator(target, schema, (result, c) => {
         if (!result.success) {
             const firstIssue = result.error.issues[0];
-            let formattedMessage;
+            let formattedMessage = "";
 
             if (firstIssue) {
                 // Join the path array into a string (e.g., ['user', 'address', 'street'] -> 'user.address.street')
