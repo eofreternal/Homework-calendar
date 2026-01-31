@@ -479,10 +479,11 @@ onMounted(async () => {
                     slot: 'completed'
                 }
             ]">
+                <!-- `pr-0.5 pl-0.5` are used here to give some wiggle room for the scrollbar if it appears. If it doesnt appear, its only applying 4px of padding so its fine -->
                 <!-- subtract 2rem for the padding added to the top of the main element, subtract 3rem for the top + bottom padding added to the navbar -->
                 <template #uncompleted>
                     <div
-                        class="flex flex-col gap-4 max-h-[calc(100dvh-var(--navbar-height)-2rem-3rem)] overflow-y-scroll">
+                        class="flex flex-col gap-4 max-h-[calc(100dvh-var(--navbar-height)-2rem-3rem)] overflow-y-scroll pr-0.5 pl-0.5">
                         <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate == null"
                             :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                     </div>
@@ -490,7 +491,7 @@ onMounted(async () => {
 
                 <template #completed>
                     <div
-                        class="flex flex-col gap-4 max-h-[calc(100dvh-var(--navbar-height)-2rem-3rem)] overflow-y-scroll">
+                        class="flex flex-col gap-4 max-h-[calc(100dvh-var(--navbar-height)-2rem-3rem)] overflow-y-scroll pr-0.5 pl-0.5">
                         <Assignment v-for="work in assignments" :key="work.id" v-show="work.completionDate !== null"
                             :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                     </div>

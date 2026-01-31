@@ -28,7 +28,7 @@ function convertMinutesToFormattedString(minutes: number) {
 </script>
 
 <template>
-    <UCard>
+    <UCard class="relative flex-none">
         <h1>{{ props.assignment.title }}</h1>
         <p class="desc">{{ props.assignment.description }}</p>
         <br>
