@@ -29,7 +29,7 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
     })
 
     .get("/:id", zValidator("query", z.object({
-        page: z.number().default(1)
+        page: z.coerce.number()
     })), async (c) => {
         const queryParams = c.req.valid("query")
         const id = parseInt(c.req.param('id'))
