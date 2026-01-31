@@ -635,7 +635,7 @@ main {
         gap: 1rem;
 
         top: 0px;
-        width: 16rem;
+        width: 24rem;
         background: var(--ui-bg);
 
         .desc {
