@@ -9,7 +9,19 @@ import * as z from "zod"
 export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
     .get("/", async (c) => {
         const classes = await db.select().from(schema.classesTable)
-        return c.json({ success: true, data: classes } as const, 200)
+        const classesCombinedWithNumberOfAssignments = []
+        for (const cls of classes) {
+            const number = await db.$count(schema.assignmentsTable, eq(schema.assignmentsTable.class, cls.id))
+
+            classesCombinedWithNumberOfAssignments.push({
+                ...cls,
+                numberOfAssignments: number
+            })
+        }
+
+        return c.json({
+            success: true, data: classesCombinedWithNumberOfAssignments
+        } as const, 200)
     })
 
     .post("/", zValidator("json", z.object({
@@ -44,12 +56,14 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
             } as const, 200)
         }
         const assignments = await db.select().from(schema.assignmentsTable).where(eq(schema.assignmentsTable.class, id)).orderBy(desc(schema.assignmentsTable.dueDate)).offset((queryParams.page - 1) * 10).limit(10)
+        const numberOfAssignments = await db.$count(schema.assignmentsTable, eq(schema.assignmentsTable.class, id))
 
         return c.json({
             success: true as const,
             data: {
                 ...fetchedClass,
-                assignments: assignments
+                assignments: assignments,
+                numberOfAssignments: numberOfAssignments
             }
         }, 200)
     })
