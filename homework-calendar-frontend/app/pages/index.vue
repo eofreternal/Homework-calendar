@@ -294,91 +294,8 @@ onMounted(async () => {
 
 <template>
     <main>
-        <div>
-            <header>
-                <h1>Calendar - Showing assigments for {{ MONTHS.at(viewCalendarDate.month) }}</h1>
-
-                <UButton @click="showCreateAssignmentModal = true">Create assignment</UButton>
-
-                <UModal v-model:open="showCreateAssignmentModal">
-                    <template #content>
-                        <UContainer class="create-assignment-wrapper">
-                            <UForm :schema="createAssignmentZodSchema" :state="createAssignmentState"
-                                @submit="onSubmitCreateAssignment" class="form">
-
-                                <UFormField label="Title" required>
-                                    <UInput placeholder="World History assignment"
-                                        v-model="createAssignmentState.title" />
-                                </UFormField>
-                                <UFormField label="Description (optional)">
-                                    <UTextarea placeholder="For Mr. Smiths class"
-                                        v-model="createAssignmentState.description" />
-                                </UFormField>
-
-                                <UFormField label="Type" required>
-                                    <USelect v-model="createAssignmentState.type" :items="['assignment', 'test/quiz']"
-                                        class="w-48" />
-                                </UFormField>
-
-                                <UFormField label="Class (optional)">
-                                    <USelect v-model="createAssignmentState.class"
-                                        :items="[...classes.map(a => a.name), 'No Class']" class="w-48" />
-
-                                    <UModal v-model:open="showCreateClassModal">
-                                        <UButton @click="showCreateClassModal = true" label="Create class"
-                                            color="neutral" variant="subtle" />
-
-                                        <template #content>
-                                            <UForm :schema="createClassZodSchema" :state="createClassState"
-                                                @submit="onSubmitCreateClass">
-                                                <UFormField label="Name">
-                                                    <UInput placeholder="Science class"
-                                                        v-model="createClassState.name" />
-                                                </UFormField>
-
-                                                <UButton type="submit">Create class</UButton>
-                                            </UForm>
-                                        </template>
-                                    </UModal>
-                                </UFormField>
-
-                                <UFormField label="Estimated completion time"
-                                    class="estimated-completetion-time-container" required>
-                                    <UInputNumber v-model="createAssignmentEstimatedCompletionTimeHours" :min="0"
-                                        :step="1" :format-options="{
-                                            style: 'unit',
-                                            unit: 'hour',
-                                            unitDisplay: 'long',
-                                        }" />
-
-                                    <UInputNumber v-model="createAssignmentEstimatedCompletionTimeMinutes" :min="0"
-                                        :max="60" :step="1" :format-options="{
-                                            style: 'unit',
-                                            unit: 'minute',
-                                            unitDisplay: 'long',
-                                        }" />
-                                </UFormField>
-
-                                <div class="dates-container" required>
-                                    <UFormField label="Start Date">
-                                        <UInputDate v-model="createAssignmentStartDate" />
-                                    </UFormField>
-
-                                    <UFormField label="Due Date">
-                                        <UInputDate v-model="createAssignmentDueDate" />
-                                    </UFormField>
-                                </div>
-
-                                <UButton loading-auto type="submit">
-                                    Submit
-                                </UButton>
-                            </UForm>
-                        </UContainer>
-                    </template>
-                </UModal>
-            </header>
-
-            <h1>Unfinished assignments from previous months</h1>
+        <div class="flex flex-col gap-4">
+            <h1 class="text-2xl font-bold">Unfinished assignments from previous months</h1>
             <UContainer class="old-assignments-container">
                 <template v-if="pageWidth > 1000">
                     <div class="months">
@@ -413,11 +330,92 @@ onMounted(async () => {
                     </template>
                 </UPopover>
             </UContainer>
-
+            <USeparator />
             <!-- TODO: use HTML tables for better a11y -->
             <div class="desktop-calendar" v-if="pageWidth >= 1000">
                 <header>
                     <h1>{{ MONTHS[viewCalendarDate.month - 1] }}</h1>
+
+                    <UButton @click="showCreateAssignmentModal = true" class="absolute right-0 self-center">Create
+                        assignment
+                    </UButton>
+
+                    <UModal v-model:open="showCreateAssignmentModal">
+                        <template #content>
+                            <UContainer class="create-assignment-wrapper">
+                                <UForm :schema="createAssignmentZodSchema" :state="createAssignmentState"
+                                    @submit="onSubmitCreateAssignment" class="form">
+
+                                    <UFormField label="Title" required>
+                                        <UInput placeholder="World History assignment"
+                                            v-model="createAssignmentState.title" />
+                                    </UFormField>
+                                    <UFormField label="Description (optional)">
+                                        <UTextarea placeholder="For Mr. Smiths class"
+                                            v-model="createAssignmentState.description" />
+                                    </UFormField>
+
+                                    <UFormField label="Type" required>
+                                        <USelect v-model="createAssignmentState.type"
+                                            :items="['assignment', 'test/quiz']" class="w-48" />
+                                    </UFormField>
+
+                                    <UFormField label="Class (optional)">
+                                        <USelect v-model="createAssignmentState.class"
+                                            :items="[...classes.map(a => a.name), 'No Class']" class="w-48" />
+
+                                        <UModal v-model:open="showCreateClassModal">
+                                            <UButton @click="showCreateClassModal = true" label="Create class"
+                                                color="neutral" variant="subtle" />
+
+                                            <template #content>
+                                                <UForm :schema="createClassZodSchema" :state="createClassState"
+                                                    @submit="onSubmitCreateClass">
+                                                    <UFormField label="Name">
+                                                        <UInput placeholder="Science class"
+                                                            v-model="createClassState.name" />
+                                                    </UFormField>
+
+                                                    <UButton type="submit">Create class</UButton>
+                                                </UForm>
+                                            </template>
+                                        </UModal>
+                                    </UFormField>
+
+                                    <UFormField label="Estimated completion time"
+                                        class="estimated-completetion-time-container" required>
+                                        <UInputNumber v-model="createAssignmentEstimatedCompletionTimeHours" :min="0"
+                                            :step="1" :format-options="{
+                                                style: 'unit',
+                                                unit: 'hour',
+                                                unitDisplay: 'long',
+                                            }" />
+
+                                        <UInputNumber v-model="createAssignmentEstimatedCompletionTimeMinutes" :min="0"
+                                            :max="60" :step="1" :format-options="{
+                                                style: 'unit',
+                                                unit: 'minute',
+                                                unitDisplay: 'long',
+                                            }" />
+                                    </UFormField>
+
+                                    <div class="dates-container" required>
+                                        <UFormField label="Start Date">
+                                            <UInputDate v-model="createAssignmentStartDate" />
+                                        </UFormField>
+
+                                        <UFormField label="Due Date">
+                                            <UInputDate v-model="createAssignmentDueDate" />
+                                        </UFormField>
+                                    </div>
+
+                                    <UButton loading-auto type="submit">
+                                        Submit
+                                    </UButton>
+                                </UForm>
+                            </UContainer>
+                        </template>
+                    </UModal>
                 </header>
 
                 <div class="weekday-headers">
@@ -602,6 +600,7 @@ main {
         gap: 1rem;
 
         header {
+            position: relative;
             display: flex;
             justify-content: center;
         }
