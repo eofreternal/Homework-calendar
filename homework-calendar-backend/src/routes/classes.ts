@@ -35,9 +35,14 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
             owner: userData.id,
 
             creationDate: Date.now()
-        }).returning({ id: schema.classesTable.id, name: schema.classesTable.name })
+        }).returning()
 
-        return c.json({ success: true, data: data! } as const, 200)
+        return c.json({
+            success: true, data: {
+                ...data!,
+                numberOfAssignments: 0
+            }
+        } as const, 200)
     })
 
     .get("/:id", zValidator("query", z.object({
