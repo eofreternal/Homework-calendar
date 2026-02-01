@@ -85,6 +85,9 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
     .patch("/:id", zValidator("json", z.object({
         title: z.string().optional(),
         description: z.string().optional(),
+        type: z.enum(["assignment", "test/quiz"]).optional(),
+        class: z.number().optional(),
+        estimatedCompletionMinutes: z.number().optional(),
 
         startDate: z.number().optional(),
         dueDate: z.number().optional(),
