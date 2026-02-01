@@ -109,6 +109,12 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
         if (body.description) {
             update["description"] = body.description
         }
+        if (body.type) {
+            update["type"] = body.type
+        }
+        if (body.estimatedCompletionMinutes) {
+            update["estimatedCompletionMinutes"] = body.estimatedCompletionMinutes
+        }
         if (body.startDate) {
             update["startDate"] = body.startDate
         }
@@ -118,6 +124,10 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
         // allows for null so that projects can be marked as uncompleted if it was previously marked as completed
         if (body.completionDate !== undefined) {
             update["completionDate"] = body.completionDate
+        }
+        // allows for null so that projects can be marked as uncompleted if it was previously marked as completed
+        if (body.class !== undefined) {
+            update["class"] = body.class
         }
 
         if (Object.keys(update).length == 0) {
