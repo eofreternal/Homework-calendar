@@ -124,12 +124,12 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
             return c.json({ success: true, data: "Nothing changed" } as const)
         }
 
-        const modified = await db.update(schema.assignmentsTable).set(update).where(
+        const [modified] = await db.update(schema.assignmentsTable).set(update).where(
             and(
                 eq(schema.assignmentsTable.id, id),
                 eq(schema.assignmentsTable.owner, userData.id)
             )
-        )
+        ).returning()
 
-        return c.json({ success: true } as const)
+        return c.json({ success: true, data: modified! } as const)
     })
