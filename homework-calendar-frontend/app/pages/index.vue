@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { client, MONTHS } from '~/utils';
 import { useUserDataStore } from '~/stores/userDataStore';
+import { useAssignmentsStore } from "~/stores/assignmentsStore"
 import type { InferResponseType } from 'hono';
 import type { FormSubmitEvent } from '@nuxt/ui'
 import z from 'zod';
@@ -8,6 +9,7 @@ import { CalendarDate } from '@internationalized/date'
 import { UPopover } from '#components'
 
 const userDataStore = useUserDataStore()
+const assignmentsStore = useAssignmentsStore()
 const toast = useToast()
 const showAssignmentsForDayState = reactive<{
     show: boolean,
@@ -143,7 +145,7 @@ async function onSubmitCreateAssignment(event: FormSubmitEvent<createAssignmentS
         title: "Created assignment!",
         description: "Hurray!!!"
     })
-    assignments.value.push(response.data)
+    assignmentsStore.addAssignment(response.data)
     return
 }
 
@@ -203,7 +205,7 @@ async function onSubmitCreateClass(event: FormSubmitEvent<createClassSchema>) {
         return
     }
 
-    classes.value.push(response.data)
+    assignmentsStore.addClass(response.data)
     createAssignmentState.class = event.data.name
     showCreateClassModal.value = false
 }
@@ -242,25 +244,14 @@ onMounted(async () => {
     userDataStore.setLoggedIn(true)
     userDataStore.setData(json.data)
 
-    const assignmentsRequest = await client.assignment.$get({
-        query: {
-            endDate: Intl.DateTimeFormat("en-GB").format(new Date(today.getFullYear(), today.getMonth() + 1, 0)).split("/").reverse().join("-")
-        }
-    })
-    const assignmentsJson = await assignmentsRequest.json()
+    assignmentsStore.fetchAssignments()
+    assignmentsStore.fetchClasses()
+})
 
-    if (assignmentsJson.success == false) {
-        toast.add({
-            color: "error",
-            title: "Something went wrong fetching pending assignments",
-            description: assignmentsJson.data
-        })
-        return
-    }
+assignmentsStore.$subscribe((mutation, state) => {
+    assignments.value = state.assignments.sort((a, b) => b.completionDate! - a.completionDate!)
 
-    assignments.value = assignmentsJson.data.sort((a, b) => b.completionDate! - a.completionDate!)
-
-    const temp = assignmentsJson.data.filter(item => {
+    const temp = state.assignments.filter(item => {
         if (new Date(item.dueDate).getMonth() !== today.getMonth()) {
             return true
         }
@@ -268,6 +259,7 @@ onMounted(async () => {
         return false
     })
 
+    oldAssignments.value.clear()
     temp.forEach(item => {
         const dueDate = new Date(item.dueDate)
         const assignmentDueMonth = MONTHS[dueDate.getMonth()]!
@@ -286,9 +278,14 @@ onMounted(async () => {
         monthData.set(dueDate.getDate(), [...dateData, item].sort((a, b) => b.completionDate! - a.completionDate!))
     })
 
-    const classesRequest = await client.classes.$get()
-    const classesJson = await classesRequest.json()
-    classes.value = classesJson.data
+    if (state.fetchAssignmentsErrorMessage !== null) {
+        toast.add({
+            color: "error",
+            title: "Something went wrong fetching pending assignments",
+            description: state.fetchAssignmentsErrorMessage
+        })
+    }
+    classes.value = state.classes
 })
 </script>
 
