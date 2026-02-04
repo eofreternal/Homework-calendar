@@ -4,7 +4,8 @@ export default defineNuxtConfig({
         '@nuxt/eslint',
         '@nuxt/ui',
 
-        '@pinia/nuxt'
+        '@pinia/nuxt',
+        "@formkit/auto-animate/nuxt"
     ],
 
     devtools: {
