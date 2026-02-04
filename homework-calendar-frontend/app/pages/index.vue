@@ -428,35 +428,36 @@ assignmentsStore.$subscribe((mutation, state) => {
                 </div>
             </div>
 
-            <div class="mobile-calendar" v-else>
+            <div class="flex flex-col gap-4" v-else>
                 <!-- Needed for the month watcher. Using the built in month controls don't work because they don't automatically choose a day in the month for you -->
-                <UCalendar :month-controls="false" :year-controls="false" v-model="mobileCurrentDate" size="lg"
-                    variant="subtle">
-                    <template #day="{ day }">
-                        <UChip :show="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined"
-                            :color="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined ? 'success' : undefined"
-                            size="2xs">
-                            {{ day.day }}
-                        </UChip>
-                    </template>
-                </UCalendar>
-                <div class="flex justify-between gap-4">
-                    <UButton color="neutral" variant="outline"
-                        @click="mobileCurrentDate = mobileCurrentDate.subtract({ months: 1 })">
-                        Prev
-                    </UButton>
-
-                    <UButton color="neutral" variant="outline"
-                        @click="mobileCurrentDate = mobileCurrentDate.add({ months: 1 })">
-                        Next
-                    </UButton>
-                </div>
-
                 <div>
-                    <template
-                        v-for="work in eventsForDate.get(mobileCurrentDate.month - 1)?.get(mobileCurrentDate.day) ?? []">
-                        <Assignment :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
-                    </template>
+                    <UCalendar :month-controls="false" :year-controls="false" v-model="mobileCurrentDate" size="lg"
+                        variant="subtle">
+                        <template #day="{ day }">
+                            <UChip :show="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined"
+                                :color="eventsForDate.get(day.month - 1)?.get(day.day) !== undefined ? 'success' : undefined"
+                                size="2xs">
+                                {{ day.day }}
+                            </UChip>
+                        </template>
+                    </UCalendar>
+                    <div class="flex justify-between gap-4">
+                        <UButton class="pr-8 pl-8" color="neutral" variant="outline" size="lg"
+                            @click="mobileCurrentDate = mobileCurrentDate.subtract({ months: 1 })">
+                            Prev
+                        </UButton>
+
+                        <UButton class="pr-8 pl-8" color="neutral" variant="outline" size="lg"
+                            @click="mobileCurrentDate = mobileCurrentDate.add({ months: 1 })">
+                            Next
+                        </UButton>
+                    </div>
+                </div>
+                <USeparator />
+                <div class="flex flex-col gap-4">
+                    <Assignment
+                        v-for="work in eventsForDate.get(mobileCurrentDate.month - 1)?.get(mobileCurrentDate.day) ?? []"
+                        :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted" />
                 </div>
             </div>
         </div>
