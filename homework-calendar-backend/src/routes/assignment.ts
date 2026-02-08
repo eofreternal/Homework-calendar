@@ -143,3 +143,18 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
 
         return c.json({ success: true, data: modified! } as const)
     })
+
+    .delete("/:id", authentication, async (c) => {
+        const id = parseInt(c.req.param("id"))
+        const userData = c.get("userData")
+        if (isNaN(id)) {
+            return c.json({ success: false, data: "Why is 'id' NaN?" } as const, 400)
+        }
+
+        const [deleted] = await db.delete(schema.assignmentsTable).where(eq(schema.assignmentsTable.id, id)).returning()
+        if (deleted == undefined) {
+            return c.json({ success: false, data: `Could not find assignment ${id}` })
+        }
+
+        return c.json({ success: true, data: deleted } as const)
+    })

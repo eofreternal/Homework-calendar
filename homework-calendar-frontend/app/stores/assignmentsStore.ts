@@ -46,6 +46,15 @@ export const useAssignmentsStore = defineStore('assignments', {
             this.assignments.push(data)
         },
 
+        removeAssignment(id: number) {
+            const index = this.assignments.findIndex(item => item.id == id)
+            if (index == -1) {
+                return
+            }
+
+            this.assignments.splice(1, index)
+        },
+
         updateAssignment(id: number, data: Partial<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"][number]>) {
             const i = this.assignments.findIndex((item) => item.id == id)
             if (i == -1) { //Well, this is awkward. This shouldn't happen

@@ -15,6 +15,8 @@ const emit = defineEmits<{
     (event: 'toggleAssignment', day: number): void;
 }>();
 
+const showEditAssignmentModal = ref(false)
+const showDeleteAssignmentModal = ref(false)
 const assignmentsStore = useAssignmentsStore()
 const editAssignmentZodSchema = z.object({
     title: z.string(),
@@ -131,6 +133,33 @@ async function onSubmitCreateClass(event: FormSubmitEvent<createClassSchema>) {
     assignmentsStore.addClass(response.data)
     showCreateClassModal.value = false
 }
+
+async function deleteAssignment(id: number) {
+    const request = await client.assignment[':id'].$delete({
+        param: {
+            id: id.toString()
+        }
+    })
+    const response = await request.json()
+
+    if (response.success == false) {
+        toast.add({
+            color: "error",
+            title: "Something went wrong",
+            description: response.data
+        })
+        return
+    }
+    toast.add({
+        color: "success",
+        title: "Assignment successfully deleted",
+    })
+    assignmentsStore.removeAssignment(id)
+
+    showCreateClassModal.value = false
+    showDeleteAssignmentModal.value = false
+    return
+}
 </script>
 
 <template>
@@ -145,11 +174,26 @@ async function onSubmitCreateClass(event: FormSubmitEvent<createClassSchema>) {
         <UButton loading-auto @click="emit('toggleAssignment', props.assignment.id)">{{
             props.assignment.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
 
-        <UModal>
-            <UButton class="absolute top-0 right-0" icon="material-symbols:edit-square-outline-rounded" label="Edit"
-                variant="ghost" />
-
+        <UButton class="absolute top-0 right-0" icon="material-symbols:edit-square-outline-rounded" label="Edit"
+            variant="ghost" @click="showEditAssignmentModal = true" />
+        <UModal v-model:open="showEditAssignmentModal">
             <template #content>
+                <UButton class="absolute top-0 right-0" icon="material-symbols:edit-square-outline-rounded"
+                    label="Delete assignment" variant="ghost" @click="showDeleteAssignmentModal = true" />
+                <UModal v-model:open="showDeleteAssignmentModal">
+                    <template #content>
+                        <UContainer class="create-assignment-wrapper">
+                            <p>Are you sure?</p>
+                            <UButton icon="material-symbols:edit-square-outline-rounded"
+                                label="Yes, delete the assignment" color="error"
+                                @click="deleteAssignment(props.assignment.id)" :loading-auto="true" />
+                            <UButton icon="material-symbols:edit-square-outline-rounded"
+                                label="No, don't delete the assignment" color="neutral"
+                                @click="showDeleteAssignmentModal = false" />
+                        </UContainer>
+                    </template>
+                </UModal>
+
                 <UContainer class="create-assignment-wrapper">
                     <UForm :schema="editAssignmentZodSchema" :state="editAssignmentState" @submit="onSubmit"
                         class="form">
