@@ -35,7 +35,6 @@ const editModalZodSchema = z.object({
     archiveDate: z.number().optional()
 })
 const selectedClassForEditModal = ref<Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"][number] | null>(null)
-const editModelState = reactive<Partial<z.infer<typeof editModalZodSchema>>>({})
 
 onMounted(async () => {
     const requests = await client.classes.$get();
@@ -88,7 +87,6 @@ function openEditModal(data: Extract<InferResponseType<typeof client.classes.$ge
     showEditModal.value = true
 
     selectedClassForEditModal.value = data
-    editModelState.name = data.name
 }
 
 async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema>>) {
@@ -123,7 +121,7 @@ async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema
                 <header class="flex justify-between">
                     <NuxtLink :to="'/class/' + data.id">{{ data.name }}</NuxtLink>
                     <p>{{ data.numberOfAssignments == 0 ? "No assignments" : `${data.numberOfAssignments} assignments`
-                    }}</p>
+                        }}</p>
                 </header>
 
                 <div class="flex flex-row gap-4 justify-end">
