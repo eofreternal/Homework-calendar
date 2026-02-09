@@ -55,6 +55,8 @@ onMounted(async () => {
 async function deleteClass(id: number) {
     const i = allClasses.value.findIndex((item) => item.id === id)
     allClasses.value.splice(i, 1)
+
+    showEditModal.value = false
 }
 
 async function setArchivedStatus(id: number, setAsArchived: boolean) {
@@ -121,7 +123,7 @@ async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema
                 <header class="flex justify-between">
                     <NuxtLink :to="'/class/' + data.id">{{ data.name }}</NuxtLink>
                     <p>{{ data.numberOfAssignments == 0 ? "No assignments" : `${data.numberOfAssignments} assignments`
-                        }}</p>
+                    }}</p>
                 </header>
 
                 <div class="flex flex-row gap-4 justify-end">
