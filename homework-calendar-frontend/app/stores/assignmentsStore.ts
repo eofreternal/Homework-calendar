@@ -52,7 +52,7 @@ export const useAssignmentsStore = defineStore('assignments', {
                 return
             }
 
-            this.assignments.splice(1, index)
+            this.assignments.splice(index, 1)
         },
 
         updateAssignment(id: number, data: Partial<Extract<InferResponseType<typeof client.assignment["$get"]>, { success: true }>["data"][number]>) {
