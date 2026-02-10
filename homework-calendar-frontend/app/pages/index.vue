@@ -508,7 +508,7 @@ assignmentsStore.$subscribe((mutation, state) => {
             :title="'Assignments for ' + showAssignmentsForDayState.day">
 
             <template #body>
-                <UContainer class="slideover-container">
+                <UContainer class="slideover-container" v-auto-animate>
                     <Assignment v-for="work in showAssignmentsForDayState.assignments" :key="work.id" :assignment="work"
                         @toggle-assignment="toggleAssignmentAsCompleted(work.id)" />
                 </UContainer>
