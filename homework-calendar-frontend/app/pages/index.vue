@@ -286,6 +286,13 @@ assignmentsStore.$subscribe((mutation, state) => {
         })
     }
     classes.value = state.classes
+
+    const ids = state.assignments.map(item => item.id)
+    showAssignmentsForDayState.assignments.forEach((item, index) => {
+        if (!ids.includes(item.id)) {
+            showAssignmentsForDayState.assignments.splice(index, 1)
+        }
+    })
 })
 </script>
 
