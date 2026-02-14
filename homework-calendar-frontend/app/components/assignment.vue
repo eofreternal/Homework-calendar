@@ -231,21 +231,22 @@ async function deleteAssignment(id: number) {
                             </UModal>
                         </UFormField>
 
-                        <UFormField label="Estimated completion time" class="estimated-completetion-time-container"
-                            required>
-                            <UInputNumber v-model="createAssignmentEstimatedCompletionTimeHours" :min="0" :step="1"
-                                :format-options="{
-                                    style: 'unit',
-                                    unit: 'hour',
-                                    unitDisplay: 'long',
-                                }" />
+                        <UFormField label="Estimated completion time" required>
+                            <div class="flex gap-4">
+                                <UInputNumber v-model="createAssignmentEstimatedCompletionTimeHours" :min="0" :step="1"
+                                    :format-options="{
+                                        style: 'unit',
+                                        unit: 'hour',
+                                        unitDisplay: 'long',
+                                    }" />
 
-                            <UInputNumber v-model="createAssignmentEstimatedCompletionTimeMinutes" :min="0" :max="60"
-                                :step="1" :format-options="{
-                                    style: 'unit',
-                                    unit: 'minute',
-                                    unitDisplay: 'long',
-                                }" />
+                                <UInputNumber v-model="createAssignmentEstimatedCompletionTimeMinutes" :min="0"
+                                    :max="60" :step="1" :format-options="{
+                                        style: 'unit',
+                                        unit: 'minute',
+                                        unitDisplay: 'long',
+                                    }" />
+                            </div>
                         </UFormField>
 
                         <div class="flex gap-2">
