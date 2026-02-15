@@ -182,6 +182,12 @@ async function toggleAssignmentAsCompleted(id: number) {
         }
         index = i
     })
+
+    assignmentsStore.updateAssignment(id, {
+        ...assignments.value[index!]!,
+        completionDate: value
+    })
+
     toast.add({
         color: "success",
         title: `${assignments.value[index!]!.title} marked as ${value ? 'completed' : "uncompleted"}!`
