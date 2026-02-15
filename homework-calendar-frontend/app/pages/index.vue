@@ -179,8 +179,8 @@ async function toggleAssignmentAsCompleted(id: number) {
     assignments.value.forEach((item, i) => {
         if (item.id == id) {
             assignments.value[i]!.completionDate = value
+            index = i
         }
-        index = i
     })
 
     assignmentsStore.updateAssignment(id, {
