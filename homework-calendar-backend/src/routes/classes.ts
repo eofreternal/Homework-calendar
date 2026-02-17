@@ -1,7 +1,7 @@
 
 import { Hono } from 'hono'
 import { authentication, zValidator, type SessionVariables } from './../middleware';
-import { eq, and, desc } from "drizzle-orm"
+import { eq, and, desc, inArray } from "drizzle-orm"
 import { db } from "../db/index"
 import * as schema from "../db/schema"
 import * as z from "zod"
@@ -97,17 +97,43 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
         return c.json({ success: true, data: updatedClass } as const)
     })
 
-    .delete("/:id", authentication, async (c) => {
+    .delete("/:id", zValidator("query", z.object({
+        actionToDoWithTheAssignments: z.union([z.literal("reassignToClass"), z.literal("delete")]).optional(),
+        reassignToClass: z.coerce.number().optional()
+    })), authentication, async (c) => {
         const userData = c.get("userData")
+        const queryParams = c.req.valid("query")
         const id = parseInt(c.req.param('id'))
         if (isNaN(id)) {
             return c.json({ success: true, data: "ID must be a number" } as const)
         }
+        const numberOfAssignments = await db.$count(schema.assignmentsTable, eq(schema.assignmentsTable.class, id))
+        if (numberOfAssignments > 0 && queryParams.actionToDoWithTheAssignments == undefined) {
+            return c.json({ success: true, data: "actionToDoWithTheAssignments must be either reassignToClass or delete since numberOfAssignments is greater than 0" } as const)
+        }
 
-        const [deletedClass] = await db.delete(schema.classesTable).where(and(
-            eq(schema.classesTable.owner, userData.id),
-            eq(schema.classesTable.id, id)
-        )).returning()
+        const deletedClass = await db.transaction(async tx => {
+            const [deletedClass] = await tx.delete(schema.classesTable).where(and(
+                eq(schema.classesTable.owner, userData.id),
+                eq(schema.classesTable.id, id)
+            )).returning()
+
+            if (numberOfAssignments > 0) {
+                const allAssignmentsWithThatClass = await tx.select({ id: schema.assignmentsTable.id }).from(schema.assignmentsTable).where(eq(schema.assignmentsTable.class, id))
+                const allAssignmentsWithThatClassIdArray = allAssignmentsWithThatClass.map(id => id.id)
+
+                if (queryParams.actionToDoWithTheAssignments == "delete") {
+                    await tx.delete(schema.assignmentsTable).where(inArray(schema.assignmentsTable.id, allAssignmentsWithThatClassIdArray))
+                }
+
+                if (queryParams.actionToDoWithTheAssignments == "reassignToClass") {
+                    const classToAssignTo = queryParams.reassignToClass == undefined ? null : queryParams.reassignToClass
+                    await tx.update(schema.assignmentsTable).set({ class: classToAssignTo }).where(inArray(schema.assignmentsTable.id, allAssignmentsWithThatClassIdArray))
+                }
+            }
+
+            return deletedClass
+        })
 
         if (deletedClass === undefined) {
             return c.json({ success: false, data: "Class not found or it doesn't belong to you" })

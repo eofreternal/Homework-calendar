@@ -2,13 +2,17 @@
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { client } from '~/utils';
 import { z } from "zod"
+import { useAssignmentsStore } from "~/stores/assignmentsStore"
 
+const assignmentStore = useAssignmentsStore()
 const toast = useToast()
 const emit = defineEmits(["onSubmit", "onDelete"])
 const props = defineProps<{
-    classId: number | null
+    classData: { id: number, numberOfAssignments: number } | null
 }>()
 const show = defineModel<boolean>("show")
+const showWhatToDoWithAssignmentsModal = ref(false)
+const className = ref("No Class")
 
 const editModalZodSchema = z.object({
     name: z.string().optional(),
@@ -18,7 +22,7 @@ const editModalZodSchema = z.object({
 const editModelState = reactive<Partial<z.infer<typeof editModalZodSchema>>>({})
 
 async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema>>) {
-    if (props.classId == null) { return; }
+    if (props.classData?.id == null) { return; }
 
     const request = await client.classes[':id'].$patch({
         json: {
@@ -28,7 +32,7 @@ async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema
         },
 
         param: {
-            id: props.classId.toString()
+            id: props.classData?.id.toString()
         }
     })
     const json = await request.json()
@@ -45,12 +49,33 @@ async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema
     emit("onSubmit", event)
 }
 
-async function deleteClass(id: number | null) {
+function findClassIdByClassName(name: string) {
+    if (name == "No Class") {
+        return undefined
+    }
+
+    return assignmentStore.classes.find(value => {
+        return value.name == name
+    })?.id
+}
+
+//I know this is bad. Tell future-me to fix it
+async function deleteClass(id: number | null, action: "reassignToClass" | "delete" | undefined, className: string | undefined) {
     if (id == null) { return; }
+    if (props.classData!.numberOfAssignments > 0 && action == undefined) {
+        console.log("setting showWhatToDoWithAssignmentsModal to true")
+        showWhatToDoWithAssignmentsModal.value = true
+        return
+    }
 
     const request = await client.classes[":id"].$delete({
         param: {
             id: id.toString()
+        },
+
+        query: {
+            actionToDoWithTheAssignments: action,
+            reassignToClass: className ? findClassIdByClassName(className) : undefined
         }
     })
     const json = await request.json()
@@ -64,11 +89,11 @@ async function deleteClass(id: number | null) {
         return
     }
 
+    showWhatToDoWithAssignmentsModal.value = false
     emit("onDelete", id)
 }
 
-watch(() => props.classId, async (classId) => {
-    console.log(props)
+watch(() => props.classData?.id, async (classId) => {
     if (classId == null) { return }
 
     const request = await client.classes[':id'].$get({
@@ -120,8 +145,34 @@ watch(() => props.classId, async (classId) => {
 
                     <div class="flex flex-row gap-4">
                         <UButton class="error" label="Yes, I'm sure" color="success"
-                            @click="deleteClass(props.classId!)" />
+                            @click="deleteClass(props.classData!.id, undefined, undefined)" />
                     </div>
+
+                    <UModal v-model:open="showWhatToDoWithAssignmentsModal">
+                        <template #body>
+                            <p>There are {{ props.classData?.numberOfAssignments }} assignments linked to this class.
+                                What do you want to do with them?</p>
+
+                            <UContainer>
+                                <UButton @click="deleteClass(props.classData!.id, 'delete', undefined)">Delete them
+                                </UButton>
+                                <UButton @click="deleteClass(props.classData!.id, 'reassignToClass', undefined)">
+                                    Reassign
+                                    them to no class</UButton>
+
+                                <div class="flex gap-4">
+                                    <UButton @click="deleteClass(props.classData!.id, 'reassignToClass', className)">
+                                        Reassign
+                                        them to a class
+                                    </UButton>
+
+                                    <USelect v-model="className"
+                                        :items="[...assignmentStore.classes.map(a => a.name), 'No Class']"
+                                        class="w-48" />
+                                </div>
+                            </UContainer>
+                        </template>
+                    </UModal>
                 </template>
             </UModal>
         </template>

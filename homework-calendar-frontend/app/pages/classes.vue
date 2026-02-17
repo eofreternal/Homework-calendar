@@ -149,6 +149,6 @@ async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema
     </main>
 
     <ClassEdit v-model:show="showEditModal"
-        :class-id="(selectedClassForEditModal == undefined) ? null : selectedClassForEditModal.id"
+        :class-data="(selectedClassForEditModal == undefined) ? null : { id: selectedClassForEditModal.id, numberOfAssignments: selectedClassForEditModal.numberOfAssignments }"
         @on-delete="deleteClass" @on-submit="onSubmit" />
 </template>
