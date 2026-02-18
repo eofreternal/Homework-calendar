@@ -3,30 +3,13 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import type { InferResponseType } from 'hono';
 import { client } from '~/utils';
 import { z } from "zod"
+import { useAssignmentsStore } from "~/stores/assignmentsStore"
+
+const assignmentStore = useAssignmentsStore()
 
 const toast = useToast()
 
-const allClasses = ref<Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"]>([]);
-const classesToShow = computed(() => {
-    const temp = {
-        "active": [],
-        "archived": []
-    } as {
-        "active": Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"],
-        "archived": Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"]
-    };
-
-    for (const cls of allClasses.value) {
-        if (cls.archiveDate) {
-            temp.archived.push(cls)
-            continue;
-        }
-
-        temp.active.push(cls)
-    }
-
-    return [...temp.active, ...temp.archived]
-})
+const classesToShow = ref<Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"]>([])
 
 const showEditModal = ref(false)
 const editModalZodSchema = z.object({
@@ -37,24 +20,32 @@ const editModalZodSchema = z.object({
 const selectedClassForEditModal = ref<Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"][number] | null>(null)
 
 onMounted(async () => {
-    const requests = await client.classes.$get();
-    const json = await requests.json()
-    // will be needed in the near future
-    // if (json.success == false) {
-    //     toast.add({
-    //         color: "error",
-    //         title: "Something went wrong",
-    //         description: json.data
-    //     })
-    //     return
-    // }
+    await assignmentStore.fetchClasses()
+})
 
-    allClasses.value = json.data
+assignmentStore.$subscribe((mutation, state) => {
+    const temp = {
+        "active": [],
+        "archived": []
+    } as {
+        "active": Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"],
+        "archived": Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"]
+    };
+
+    for (const cls of state.classes) {
+        if (cls.archiveDate) {
+            temp.archived.push(cls)
+            continue;
+        }
+
+        temp.active.push(cls)
+    }
+
+    classesToShow.value = [...temp.active, ...temp.archived]
 })
 
 async function deleteClass(id: number) {
-    const i = allClasses.value.findIndex((item) => item.id === id)
-    allClasses.value.splice(i, 1)
+    assignmentStore.removeClass(id)
 
     showEditModal.value = false
 }
@@ -81,8 +72,7 @@ async function setArchivedStatus(id: number, setAsArchived: boolean) {
         return
     }
 
-    const i = allClasses.value.findIndex((item) => item.id === id)
-    allClasses.value[i]!.archiveDate = setAsArchived ? now : null
+    assignmentStore.updateClass(id, { archiveDate: setAsArchived ? now : null })
 }
 
 function openEditModal(data: Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"][number]) {
@@ -92,21 +82,11 @@ function openEditModal(data: Extract<InferResponseType<typeof client.classes.$ge
 }
 
 async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema>>) {
-    const i = allClasses.value.findIndex((item) => item.id === selectedClassForEditModal.value.id)
-    if (i == undefined) {
-        toast.add({
-            color: "error",
-            title: "Something went wrong",
-            description: "Error updating UI. Could not find class in allClasses array via ID"
-        })
-        return
-    }
-
     if (event.data.name) {
-        allClasses.value[i]!.name = event.data.name
+        assignmentStore.updateClass(selectedClassForEditModal.value!.id, { name: event.data.name })
     }
     if (event.data.archiveDate) {
-        allClasses.value[i]!.archiveDate = event.data.archiveDate
+        assignmentStore.updateClass(selectedClassForEditModal.value!.id, { archiveDate: event.data.archiveDate })
     }
 }
 </script>

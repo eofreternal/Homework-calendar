@@ -71,6 +71,15 @@ export const useAssignmentsStore = defineStore('assignments', {
             this.classes.push(data)
         },
 
+        removeClass(id: number) {
+            const index = this.classes.findIndex(item => item.id == id)
+            if (index == -1) {
+                return
+            }
+
+            this.classes.splice(index, 1)
+        },
+
         updateClass(id: number, data: Partial<Extract<InferResponseType<typeof client.classes.$get>, { success: true }>["data"][number]>) {
             const i = this.classes.findIndex((item) => item.id == id)
             if (i == -1) { //Well, this is awkward. This shouldn't happen
