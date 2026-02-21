@@ -164,45 +164,61 @@ async function deleteAssignment(id: number) {
 
 <template>
     <UCard class="relative flex-none">
-        <h1>{{ props.assignment.title }}</h1>
-        <p class="desc">{{ props.assignment.description }}</p>
-        <br>
-        <p>Estimated time: {{ convertMinutesToFormattedString(props.assignment.estimatedCompletionMinutes) }}</p>
-        <p v-if="props.assignment.completionDate !== null">Date completed: {{ new
-            Date(props.assignment.completionDate).toLocaleDateString() }}</p>
-        <p>Due Date: {{ new Date(props.assignment.dueDate).toLocaleDateString() }}</p>
-        <UButton loading-auto @click="emit('toggleAssignment', props.assignment.id)">{{
-            props.assignment.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
+        <div class="flex flex-col gap-4">
+            <div>
+                <h1 class="">{{ props.assignment.title }}</h1>
+                <p class="desc">{{ props.assignment.description }}</p>
+                <br>
+                <p class="flex gap-1 items-center">
+                    <Icon name="bx:alarm" /> {{
+                        convertMinutesToFormattedString(props.assignment.estimatedCompletionMinutes) }}
+                </p>
+                <p class="flex gap-1 items-center">
+                    <Icon name="bx:calendar" /> {{ new Date(props.assignment.dueDate).toLocaleDateString() }}
+                </p>
+                <p class="flex gap-1 items-center" v-if="props.assignment.completionDate !== null">
+                    <Icon name="bx:calendar-check" /> {{ new
+                        Date(props.assignment.completionDate).toLocaleDateString() }}
+                </p>
+            </div>
+            <UButton class="w-fit" loading-auto @click="emit('toggleAssignment', props.assignment.id)">{{
+                props.assignment.completionDate ? "Unmark as completed" : "Mark as completed" }}</UButton>
+        </div>
 
         <UButton class="absolute top-0 right-0" icon="material-symbols:edit-square-outline-rounded" label="Edit"
             variant="ghost" @click="showEditAssignmentModal = true" />
         <UModal v-model:open="showEditAssignmentModal">
             <template #content>
-                <UButton class="absolute top-0 right-0" icon="material-symbols:edit-square-outline-rounded"
-                    label="Delete assignment" variant="ghost" @click="showDeleteAssignmentModal = true" />
+                <UButton class="absolute top-0 right-0" icon="ix:trashcan" label="Delete assignment" variant="ghost"
+                    color="error" @click="showDeleteAssignmentModal = true" />
                 <UModal v-model:open="showDeleteAssignmentModal">
                     <template #content>
-                        <UContainer class="create-assignment-wrapper">
-                            <p>Are you sure?</p>
-                            <UButton icon="material-symbols:edit-square-outline-rounded"
-                                label="Yes, delete the assignment" color="error"
-                                @click="deleteAssignment(props.assignment.id)" :loading-auto="true" />
-                            <UButton icon="material-symbols:edit-square-outline-rounded"
-                                label="No, don't delete the assignment" color="neutral"
-                                @click="showDeleteAssignmentModal = false" />
-                        </UContainer>
+                        <div class="flex flex-col gap-4 p-4">
+                            <p class="font-bold font-xl self-center">Are you sure?</p>
+
+                            <div class="flex gap-4">
+                                <UButton icon="material-symbols:edit-square-outline-rounded"
+                                    label="Yes, delete the assignment" color="error" class="w-fit"
+                                    @click="deleteAssignment(props.assignment.id)" :loading-auto="true" />
+                                <UButton icon="material-symbols:edit-square-outline-rounded" class="w-fit"
+                                    label="No, don't delete the assignment" color="neutral" variant="ghost"
+                                    @click="showDeleteAssignmentModal = false" />
+                            </div>
+                        </div>
                     </template>
                 </UModal>
 
-                <UContainer class="create-assignment-wrapper">
+                <div class="p-4">
                     <UForm :schema="editAssignmentZodSchema" :state="editAssignmentState" @submit="onSubmit"
-                        class="form">
+                        class="flex flex-col gap-4">
 
                         <UFormField label="Title" required>
-                            <UInput placeholder="World History assignment" v-model="editAssignmentState.title" />
+                            <UInput class="w-full" placeholder="World History assignment"
+                                v-model="editAssignmentState.title" />
                         </UFormField>
                         <UFormField label="Description (optional)">
-                            <UTextarea placeholder="For Mr. Smiths class" v-model="editAssignmentState.description" />
+                            <UTextarea class="w-full" placeholder="For Mr. Smiths class"
+                                v-model="editAssignmentState.description" />
                         </UFormField>
 
                         <UFormField label="Type" required>
@@ -211,24 +227,29 @@ async function deleteAssignment(id: number) {
                         </UFormField>
 
                         <UFormField label="Class (optional)">
-                            <USelect v-model="editAssignmentState.class"
-                                :items="[...assignmentsStore.classes.map(a => a.name), 'No Class']" class="w-48" />
+                            <div class="flex gap-4">
+                                <USelect v-model="editAssignmentState.class"
+                                    :items="[...assignmentsStore.classes.map(a => a.name), 'No Class']" class="w-48" />
 
-                            <UModal v-model:open="showCreateClassModal">
-                                <UButton @click="showCreateClassModal = true" label="Create class" color="neutral"
-                                    variant="subtle" />
+                                <UModal v-model:open="showCreateClassModal">
+                                    <UButton @click="showCreateClassModal = true" label="Create class" color="neutral"
+                                        variant="subtle" />
 
-                                <template #content>
-                                    <UForm :schema="createClassZodSchema" :state="createClassState"
-                                        @submit="onSubmitCreateClass">
-                                        <UFormField label="Name">
-                                            <UInput placeholder="Science class" v-model="createClassState.name" />
-                                        </UFormField>
+                                    <template #content>
+                                        <div class="p-4">
+                                            <UForm :schema="createClassZodSchema" :state="createClassState"
+                                                @submit="onSubmitCreateClass">
+                                                <UFormField label="Name">
+                                                    <UInput placeholder="Science class"
+                                                        v-model="createClassState.name" />
+                                                </UFormField>
 
-                                        <UButton type="submit">Create class</UButton>
-                                    </UForm>
-                                </template>
-                            </UModal>
+                                                <UButton type="submit">Create class</UButton>
+                                            </UForm>
+                                        </div>
+                                    </template>
+                                </UModal>
+                            </div>
                         </UFormField>
 
                         <UFormField label="Estimated completion time" required>
@@ -259,11 +280,11 @@ async function deleteAssignment(id: number) {
                             </UFormField>
                         </div>
 
-                        <UButton loading-auto type="submit">
+                        <UButton class="w-fit" loading-auto type="submit">
                             Submit
                         </UButton>
                     </UForm>
-                </UContainer>
+                </div>
             </template>
         </UModal>
     </UCard>

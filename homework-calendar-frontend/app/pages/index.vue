@@ -350,18 +350,18 @@ assignmentsStore.$subscribe((mutation, state) => {
                         assignment
                     </UButton>
 
-                    <UModal v-model:open="showCreateAssignmentModal">
-                        <template #content>
-                            <UContainer class="create-assignment-wrapper">
+                    <UModal title="Homework? Oh no TwT" v-model:open="showCreateAssignmentModal">
+                        <template #body>
+                            <div class="create-assignment-wrapper">
                                 <UForm :schema="createAssignmentZodSchema" :state="createAssignmentState"
                                     @submit="onSubmitCreateAssignment" class="form">
 
                                     <UFormField label="Title" required>
-                                        <UInput placeholder="World History assignment"
+                                        <UInput class="w-full" placeholder="World History assignment"
                                             v-model="createAssignmentState.title" />
                                     </UFormField>
                                     <UFormField label="Description (optional)">
-                                        <UTextarea placeholder="For Mr. Smiths class"
+                                        <UTextarea class="w-full" placeholder="For Mr. Smiths class"
                                             v-model="createAssignmentState.description" />
                                     </UFormField>
 
@@ -371,25 +371,29 @@ assignmentsStore.$subscribe((mutation, state) => {
                                     </UFormField>
 
                                     <UFormField label="Class (optional)">
-                                        <USelect v-model="createAssignmentState.class"
-                                            :items="[...classes.map(a => a.name), 'No Class']" class="w-48" />
+                                        <div class="flex gap-4">
+                                            <USelect v-model="createAssignmentState.class"
+                                                :items="[...classes.map(a => a.name), 'No Class']" class="w-48" />
 
-                                        <UModal v-model:open="showCreateClassModal">
-                                            <UButton @click="showCreateClassModal = true" label="Create class"
-                                                color="neutral" variant="subtle" />
+                                            <UModal title="Create a class" v-model:open="showCreateClassModal">
+                                                <UButton @click="showCreateClassModal = true" label="Create class"
+                                                    color="neutral" variant="subtle" />
 
-                                            <template #content>
-                                                <UForm :schema="createClassZodSchema" :state="createClassState"
-                                                    @submit="onSubmitCreateClass">
-                                                    <UFormField label="Name">
-                                                        <UInput placeholder="Science class"
-                                                            v-model="createClassState.name" />
-                                                    </UFormField>
+                                                <template #content>
+                                                    <div class="p-4">
+                                                        <UForm :schema="createClassZodSchema" :state="createClassState"
+                                                            @submit="onSubmitCreateClass" class="flex flex-col gap-4">
+                                                            <UFormField label="Name">
+                                                                <UInput placeholder="Science class"
+                                                                    v-model="createClassState.name" />
+                                                            </UFormField>
 
-                                                    <UButton type="submit">Create class</UButton>
-                                                </UForm>
-                                            </template>
-                                        </UModal>
+                                                            <UButton class="w-fit" type="submit">Create class</UButton>
+                                                        </UForm>
+                                                    </div>
+                                                </template>
+                                            </UModal>
+                                        </div>
                                     </UFormField>
 
                                     <UFormField label="Estimated completion time" required>
@@ -420,11 +424,11 @@ assignmentsStore.$subscribe((mutation, state) => {
                                         </UFormField>
                                     </div>
 
-                                    <UButton loading-auto type="submit">
+                                    <UButton class="w-fit" loading-auto type="submit">
                                         Submit
                                     </UButton>
                                 </UForm>
-                            </UContainer>
+                            </div>
                         </template>
                     </UModal>
                 </header>
@@ -487,10 +491,10 @@ assignmentsStore.$subscribe((mutation, state) => {
             :title="'Assignments for ' + showAssignmentsForDayState.day">
 
             <template #body>
-                <UContainer class="slideover-container" v-auto-animate>
-                    <Assignment v-for="work in showAssignmentsForDayState.assignments" :key="work.id" :assignment="work"
-                        @toggle-assignment="toggleAssignmentAsCompleted(work.id)" />
-                </UContainer>
+                <div class="slideover-container" v-auto-animate>
+                    <Assignment class="w-full" v-for="work in showAssignmentsForDayState.assignments" :key="work.id"
+                        :assignment="work" @toggle-assignment="toggleAssignmentAsCompleted(work.id)" />
+                </div>
             </template>
         </USlideover>
     </main>
@@ -511,7 +515,9 @@ assignmentsStore.$subscribe((mutation, state) => {
 }
 
 .create-assignment-wrapper {
-    padding: 1rem;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
 
     .form {
         display: flex;
@@ -540,7 +546,7 @@ main {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    padding-top: 2rem;
+    padding-top: 1rem;
 
     header {
         h1 {

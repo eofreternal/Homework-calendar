@@ -102,28 +102,37 @@ async function onSubmit(event: FormSubmitEvent<z.infer<typeof editModalZodSchema
                 <UBadge label="Archived" color="warning" v-show="!!data.archiveDate" class="absolute top-0 right-0" />
                 <header class="flex justify-between">
                     <NuxtLink :to="'/class/' + data.id">{{ data.name }}</NuxtLink>
-                    <p>{{ data.numberOfAssignments == 0 ? "No assignments" : `${data.numberOfAssignments} assignments`
-                    }}</p>
+                    <p>{{ data.numberOfAssignments == 0 ? "No assignments" : (`${data.numberOfAssignments} assignment` +
+                        (data.numberOfAssignments == 1 ? "" : "s"))
+                        }}</p>
                 </header>
 
                 <div class="flex flex-row gap-4 justify-end">
                     <UButton icon="material-symbols:edit-square-outline-rounded" label="Edit"
-                        :title="'edit class' + data.name" @click="openEditModal(data)" />
+                        :title="'edit class' + data.name" @click="openEditModal(data)" color="neutral"
+                        variant="subtle" />
 
                     <UButton icon="uil:archive"
                         :title="!data.archiveDate ? 'Archive' : 'Unarchive' + ' class ' + data.name"
-                        :label="!data.archiveDate ? 'Archive' : 'Unarchive'"
+                        :label="!data.archiveDate ? 'Archive' : 'Unarchive'" color="warning" variant="subtle"
                         @click="() => setArchivedStatus(data.id, !data.archiveDate)" />
-                </div>
 
-                <footer>
-                    <p>{{ new Date(data.creationDate).toLocaleDateString("us-EN", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                    }) }}</p>
-                </footer>
+                    <UPopover mode="hover">
+                        <UButton icon="mdi:information-symbol" color="neutral" variant="subtle" />
+
+                        <template #content>
+                            <div class="flex flex-col gap-4 p-8">
+                                <p><span class="text-slate-400">Creation date: </span>{{ new
+                                    Date(data.creationDate).toLocaleDateString("us-EN", {
+                                        weekday: "long",
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                    }) }}</p>
+                            </div>
+                        </template>
+                    </UPopover>
+                </div>
             </UCard>
         </div>
     </main>

@@ -116,65 +116,75 @@ watch(() => props.classData?.id, async (classId) => {
 </script>
 
 <template>
-    <UModal v-model:open="show" :title="'Edit class ' + editModelState.name">
+    <UModal v-model:open="show" :title="'Editing class ' + editModelState.name">
         <template #body>
-            <UForm :schema="editModalZodSchema" :state="editModelState" @submit="onSubmit">
-                <UFormField label="Name" name="name">
-                    <UInput v-model="editModelState.name" type="text" />
-                </UFormField>
+            <UContainer class="flex flex-col gap-4">
+                <UForm :schema="editModalZodSchema" :state="editModelState" @submit="onSubmit">
+                    <div class="flex flex-col gap-4">
+                        <UFormField label="Name" name="name">
+                            <UInput v-model="editModelState.name" type="text" />
+                        </UFormField>
 
-                <UButton type="submit">
-                    Submit
-                </UButton>
-            </UForm>
-
-            <UModal>
-                <UButton color="error" icon="mdi:trash-can-outline" label="Delete" />
-
-                <template #body>
-                    <p>If this class is over, you should archive it instead of deleting the class to
-                        keep the history of all your assignments
-                        <template v-if="!!editModelState.archiveDate">
-                            (It's already archived!)
-                        </template>
-                    </p>
-                    <UButton icon="uil:archive"
-                        :title="!editModelState.archiveDate ? 'Archive' : 'Unarchive' + ' class ' + editModelState.name"
-                        :label="!editModelState.archiveDate ? 'Archive' : 'Unarchive'"
-                        @click="onSubmit({ data: { archiveDate: Date.now() } } as FormSubmitEvent<z.infer<typeof editModalZodSchema>>)" />
-
-                    <div class="flex flex-row gap-4">
-                        <UButton class="error" label="Yes, I'm sure" color="success"
-                            @click="deleteClass(props.classData!.id, undefined, undefined)" />
+                        <UButton class="w-fit" type="submit" label="Save changes" />
                     </div>
+                </UForm>
 
-                    <UModal v-model:open="showWhatToDoWithAssignmentsModal">
-                        <template #body>
-                            <p>There are {{ props.classData?.numberOfAssignments }} assignments linked to this class.
-                                What do you want to do with them?</p>
+                <USeparator />
+                <UModal>
+                    <UButton class="w-fit" color="error" icon="mdi:trash-can-outline" label="Delete" />
 
-                            <UContainer>
-                                <UButton @click="deleteClass(props.classData!.id, 'delete', undefined)">Delete them
-                                </UButton>
-                                <UButton @click="deleteClass(props.classData!.id, 'reassignToClass', undefined)">
-                                    Reassign
-                                    them to no class</UButton>
+                    <template #body>
+                        <UContainer class="flex flex-col gap-8">
+                            <p>If this class is over, you should archive it instead of deleting the class to
+                                keep the history of all your assignments
+                                <template v-if="!!editModelState.archiveDate">
+                                    (It's already archived!)
+                                </template>
+                            </p>
+                            <div class="flex gap-8 justify-center">
+                                <UButton icon="uil:archive"
+                                    :title="!editModelState.archiveDate ? 'Archive' : 'Unarchive' + ' class ' + editModelState.name"
+                                    :label="!editModelState.archiveDate ? 'Archive' : 'Unarchive'" color="warning"
+                                    variant="subtle"
+                                    @click="onSubmit({ data: { archiveDate: Date.now() } } as FormSubmitEvent<z.infer<typeof editModalZodSchema>>)" />
 
-                                <div class="flex gap-4">
-                                    <UButton @click="deleteClass(props.classData!.id, 'reassignToClass', className)">
-                                        Reassign
-                                        them to a class
-                                    </UButton>
-
-                                    <USelect v-model="className"
-                                        :items="[...assignmentStore.classes.map(a => a.name), 'No Class']"
-                                        class="w-48" />
+                                <div class="flex flex-row gap-4">
+                                    <UButton class="error" label="Yes, I'm sure" color="error" variant="ghost"
+                                        @click="deleteClass(props.classData!.id, undefined, undefined)" />
                                 </div>
-                            </UContainer>
-                        </template>
-                    </UModal>
-                </template>
-            </UModal>
+                            </div>
+                        </UContainer>
+
+                        <UModal v-model:open="showWhatToDoWithAssignmentsModal">
+                            <template #body>
+                                <UContainer class="flex flex-col gap-4">
+                                    <p>There are {{ props.classData?.numberOfAssignments }} assignments linked to this
+                                        class.
+                                        What do you want to do with them?</p>
+
+                                    <UContainer class="flex flex-col gap-4">
+                                        <UButton @click="deleteClass(props.classData!.id, 'delete', undefined)"
+                                            label="Delete them" />
+                                        <UButton @click="deleteClass(props.classData!.id, 'reassignToClass', undefined)"
+                                            label="Reassign
+                                    them to no class" />
+
+                                        <div class="flex gap-4">
+                                            <UButton
+                                                @click="deleteClass(props.classData!.id, 'reassignToClass', className)"
+                                                label="Reassign them to a class" />
+
+                                            <USelect v-model="className"
+                                                :items="[...assignmentStore.classes.map(a => a.name), 'No Class']"
+                                                class="w-48" />
+                                        </div>
+                                    </UContainer>
+                                </UContainer>
+                            </template>
+                        </UModal>
+                    </template>
+                </UModal>
+            </UContainer>
         </template>
     </UModal>
 </template>
