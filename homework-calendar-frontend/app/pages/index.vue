@@ -483,9 +483,8 @@ assignmentsStore.$subscribe((mutation, state) => {
         <UButton class="toggle-sidebar"
             @click="mobileShowUpcomingAssignmentsSidebar = !mobileShowUpcomingAssignmentsSidebar"
             icon="material-symbols:assignment-outline" v-if="pageWidth < 1000" />
-        <AssignmentsSidebar :assignments="assignments"
-            v-show="(pageWidth > 1000) || mobileShowUpcomingAssignmentsSidebar" :mobile="pageWidth < 1000"
-            :toggleAssignmentAsCompleted="toggleAssignmentAsCompleted" />
+        <AssignmentsSidebar v-show="(pageWidth > 1000) || mobileShowUpcomingAssignmentsSidebar"
+            :mobile="pageWidth < 1000" :toggleAssignmentAsCompleted="toggleAssignmentAsCompleted" />
 
         <USlideover v-model:open="showAssignmentsForDayState.show"
             :title="'Assignments for ' + showAssignmentsForDayState.day">
