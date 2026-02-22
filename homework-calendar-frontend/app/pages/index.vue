@@ -58,7 +58,7 @@ const createClassZodSchema = z.object({
 type createClassSchema = z.infer<typeof createClassZodSchema>
 const createClassState = reactive<Partial<createClassSchema>>({})
 
-const viewCalendarDate = shallowRef(new CalendarDate(today.getFullYear(), today.getMonth(), today.getDay()))
+const viewCalendarDate = shallowRef(new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDay()))
 const calendarDays = computed(() => {
     const year = viewCalendarDate.value.year
     const month = viewCalendarDate.value.month - 1 // CalendarDate months start at 1. Date starts at 0
