@@ -70,6 +70,16 @@ function findClassIdByClassName(name: string) {
     })?.id
 }
 
+function findClassNameById(id: number | null) {
+    if (id == null) {
+        return "No Class"
+    }
+
+    return assignmentsStore.classes.find(value => {
+        return value.id == id
+    })?.name
+}
+
 async function onSubmit(event: FormSubmitEvent<editAssignmentSchema>) {
     const classId = findClassIdByClassName(event.data.class)
     const request = await client.assignment[":id"].$patch({
@@ -179,6 +189,9 @@ async function deleteAssignment(id: number) {
                 <p class="flex gap-1 items-center" v-if="props.assignment.completionDate !== null">
                     <Icon name="bx:calendar-check" /> {{ new
                         Date(props.assignment.completionDate).toLocaleDateString() }}
+                </p>
+                <p>Class:
+                    <UBadge color="secondary" :label="findClassNameById(props.assignment.class)" />
                 </p>
             </div>
             <UButton class="w-fit" loading-auto @click="emit('toggleAssignment', props.assignment.id)">{{
