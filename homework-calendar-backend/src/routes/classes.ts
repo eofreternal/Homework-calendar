@@ -7,8 +7,10 @@ import * as schema from "../db/schema"
 import * as z from "zod"
 
 export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
-    .get("/", async (c) => {
-        const classes = await db.select().from(schema.classesTable)
+    .get("/", authentication, async (c) => {
+        const userData = c.get("userData")
+
+        const classes = await db.select().from(schema.classesTable).where(eq(schema.classesTable.owner, userData.id))
         const classesCombinedWithNumberOfAssignments = []
         for (const cls of classes) {
             const number = await db.$count(schema.assignmentsTable, eq(schema.assignmentsTable.class, cls.id))
@@ -47,7 +49,8 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
 
     .get("/:id", zValidator("query", z.object({
         page: z.coerce.number()
-    })), async (c) => {
+    })), authentication, async (c) => {
+        const userData = c.get("userData")
         const queryParams = c.req.valid("query")
         const id = parseInt(c.req.param('id'))
         if (isNaN(id)) {
@@ -60,7 +63,7 @@ export const classesRoutes = new Hono<{ Variables: SessionVariables }>()
                 success: false, data: `No class exists under the id ${id}`
             } as const, 200)
         }
-        const assignments = await db.select().from(schema.assignmentsTable).where(eq(schema.assignmentsTable.class, id)).orderBy(desc(schema.assignmentsTable.dueDate)).offset((queryParams.page - 1) * 10).limit(10)
+        const assignments = await db.select().from(schema.assignmentsTable).where(and(eq(schema.assignmentsTable.class, id), eq(schema.assignmentsTable.owner, userData.id))).orderBy(desc(schema.assignmentsTable.dueDate)).offset((queryParams.page - 1) * 10).limit(10)
         const numberOfAssignments = await db.$count(schema.assignmentsTable, eq(schema.assignmentsTable.class, id))
 
         return c.json({

@@ -28,4 +28,10 @@ export default defineNuxtConfig({
             }
         }
     },
+
+    runtimeConfig: {
+        public: {
+            multipleAccounts: false
+        }
+    }
 })

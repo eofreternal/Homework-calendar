@@ -8,6 +8,7 @@ import z from 'zod';
 import { CalendarDate } from '@internationalized/date'
 import { UPopover } from '#components'
 
+const runtimeConfig = useRuntimeConfig()
 const userDataStore = useUserDataStore()
 const assignmentsStore = useAssignmentsStore()
 const toast = useToast()
@@ -233,22 +234,32 @@ onMounted(async () => {
         color: "info",
         title: "Logging in..."
     })
-    const login = await client.auth.login.$post({ json: { username: "Default User", password: "default" } })
-    const json = await login.json()
-    if (json.success == false) {
+
+    if (runtimeConfig.public.multipleAccounts == false) {
+        const request = await client.auth.valid.$get()
+        const requestResponse = await request.json()
+        //@ts-expect-error this is intentional
+        if (requestResponse.success == false) {
+            userDataStore.setData(requestResponse.data)
+        }
+
+        const login = await client.auth.login.$post({ json: { username: "Default User", password: "default" } })
+        const json = await login.json()
+        if (json.success == false) {
+            toast.add({
+                color: "error",
+                title: "Something went wrong",
+                description: json.data
+            })
+            return
+        }
         toast.add({
-            color: "error",
-            title: "Something went wrong",
-            description: json.data
+            color: "success",
+            title: "Logged in"
         })
-        return
+        userDataStore.setLoggedIn(true)
+        userDataStore.setData(json.data)
     }
-    toast.add({
-        color: "success",
-        title: "Logged in"
-    })
-    userDataStore.setLoggedIn(true)
-    userDataStore.setData(json.data)
 
     assignmentsStore.fetchAssignments()
     assignmentsStore.fetchClasses()

@@ -1,11 +1,19 @@
 import { Hono } from 'hono'
-import { zValidator, type SessionVariables } from './../middleware';
+import { authentication, zValidator, type SessionVariables } from './../middleware';
 import * as schema from "../db/schema"
 import { eq } from "drizzle-orm"
 import { db } from "../db/index"
 import * as z from "zod"
 
 export const authRoutes = new Hono<{ Variables: SessionVariables }>()
+    .get("/valid", authentication, async (c) => {
+        const userData = c.get("userData")
+
+        return c.json({
+            success: true, data: userData
+        } as const, 200)
+    })
+
     .post("/register", zValidator("json", z.object({
         username: z.string(),
         password: z.string()
@@ -27,7 +35,7 @@ export const authRoutes = new Hono<{ Variables: SessionVariables }>()
         }).returning()
 
         session.set("id", user!.id)
-        return c.json({ success: true, data: user } as const)
+        return c.json({ success: true, data: user! } as const)
     })
 
     .post("/login", zValidator("json", z.object({
@@ -54,4 +62,10 @@ export const authRoutes = new Hono<{ Variables: SessionVariables }>()
                 username: user.username,
             }
         } as const)
+    })
+
+    .get("/logout", authentication, (c) => {
+        const session = c.get("session")
+        session.forget("id")
+        return c.redirect("/")
     })
