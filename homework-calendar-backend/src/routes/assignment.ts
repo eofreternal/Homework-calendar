@@ -146,7 +146,6 @@ export const assignmentRoutes = new Hono<{ Variables: SessionVariables }>()
 
     .delete("/:id", authentication, async (c) => {
         const id = parseInt(c.req.param("id"))
-        const userData = c.get("userData")
         if (isNaN(id)) {
             return c.json({ success: false, data: "Why is 'id' NaN?" } as const, 400)
         }
