@@ -75,7 +75,7 @@ async function deleteClass(id: number | null, action: "reassignToClass" | "delet
 
         query: {
             actionToDoWithTheAssignments: action,
-            reassignToClass: className ? findClassIdByClassName(className) : undefined
+            reassignToClass: (className == undefined) ? undefined : findClassIdByClassName(className)?.toString()
         }
     })
     const json = await request.json()
