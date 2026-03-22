@@ -87,16 +87,18 @@ const eventsForDate = computed(() => {
         const month = dueDate.getMonth()
         const date = dueDate.getDate()
 
-        const currentMonthValue = events.get(month)
+        let currentMonthValue = events.get(month)
         if (currentMonthValue === undefined) {
             events.set(month, new Map())
+            currentMonthValue = events.get(month)!
+        }
+
+        const currentDateValue = currentMonthValue.get(date)
+        if (currentDateValue === undefined) {
+            currentMonthValue.set(date, [event])
         } else {
-            const currentDateValue = currentMonthValue.get(date)
-            if (currentDateValue === undefined) {
-                currentMonthValue.set(date, [event])
-            } else {
-                currentMonthValue.set(date, [...currentDateValue, event])
-            }
+            currentMonthValue.set(date, [...currentDateValue, event])
+            console.log([...currentDateValue, event])
         }
     }
 
