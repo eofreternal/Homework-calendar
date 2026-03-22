@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import { parseConfig } from "./src/utils"
+const config = parseConfig()
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
@@ -6,6 +7,6 @@ export default defineConfig({
     schema: './src/db/schema.ts',
     dialect: 'sqlite',
     dbCredentials: {
-        url: process.env.DB_FILE_NAME!,
+        url: config.DB_FILE_NAME,
     },
 });
