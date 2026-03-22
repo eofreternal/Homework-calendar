@@ -8,7 +8,6 @@ import z from 'zod';
 import { CalendarDate } from '@internationalized/date'
 import { UPopover } from '#components'
 
-const runtimeConfig = useRuntimeConfig()
 const userDataStore = useUserDataStore()
 const assignmentsStore = useAssignmentsStore()
 const toast = useToast()

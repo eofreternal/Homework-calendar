@@ -27,11 +27,5 @@ export default defineNuxtConfig({
                 braceStyle: '1tbs'
             }
         }
-    },
-
-    runtimeConfig: {
-        public: {
-            multipleAccounts: false
-        }
     }
 })
