@@ -230,12 +230,15 @@ onMounted(async () => {
         pageWidth.value = window.innerWidth
     });
 
-    toast.add({
-        color: "info",
-        title: "Logging in..."
-    })
+    const configReq = await client.config.$get()
+    const configJson = await configReq.json()
 
-    if (runtimeConfig.public.multipleAccounts == false) {
+    if (configJson.data.MULTIPLE_ACCOUNTS == false) {
+        toast.add({
+            color: "info",
+            title: "Logging in..."
+        })
+
         const request = await client.auth.valid.$get()
         const requestResponse = await request.json()
         //@ts-expect-error this is intentional

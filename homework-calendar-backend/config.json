@@ -1,0 +1,7 @@
+{
+  "DB_FILE_NAME": "mydb.sqlite",
+  
+  "MULTIPLE_ACCOUNTS": true,
+  "ALLOW_LOGINS": true,
+  "ALLOW_REGISTRATION": true
+}

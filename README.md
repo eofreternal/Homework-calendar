@@ -18,4 +18,10 @@ I must say- `bun install` is faster than `pnpm` and `npm` hehe; I love `bun inst
 
 ---
 
-You can allow multiple users to exist and have logins and registration by changing `multipleAccounts` to `true` in `nuxt.config.ts`.
+You can allow multiple users to exist and have endable/disable logins and registration by changing in the `config.json` file in the backend folder.
+
+---
+
+The goal of this homework calendar is to give you a place to track your assignments and whatnot.
+
+The reason I added the functionality to disable logins/registration is because I would be hosting this on my person domain but I didn't want other people using my instance.

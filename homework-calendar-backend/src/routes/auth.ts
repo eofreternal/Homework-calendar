@@ -5,6 +5,9 @@ import { eq } from "drizzle-orm"
 import { db } from "../db/index"
 import * as z from "zod"
 
+import { parseConfig } from "../utils"
+const config = parseConfig()
+
 export const authRoutes = new Hono<{ Variables: SessionVariables }>()
     .get("/valid", authentication, async (c) => {
         const userData = c.get("userData")
@@ -20,6 +23,10 @@ export const authRoutes = new Hono<{ Variables: SessionVariables }>()
     })), async (c) => {
         const body = await c.req.valid("json")
         const session = c.get("session")
+
+        if (config.ALLOW_REGISTRATION == false) {
+            return c.json({ success: false, data: "Registration is disabled" } as const, 404)
+        }
 
         const [usernameInUse] = await db.select().from(schema.usersTable).where(eq(schema.usersTable.username, body.username))
         if (usernameInUse !== undefined) {
@@ -44,6 +51,16 @@ export const authRoutes = new Hono<{ Variables: SessionVariables }>()
     })), async (c) => {
         const body = await c.req.valid("json")
         const session = c.get("session")
+
+        if (config.ALLOW_LOGINS == false) {
+            return c.json({ success: false, data: "Logins are disabled" } as const, 404)
+        }
+
+        if (config.MULTIPLE_ACCOUNTS == true) {
+            if (body.username == "Default User") {
+                return c.json({ success: false, data: "The default user is disabled because multiple accounts are allowed to exist" } as const, 404)
+            }
+        }
 
         const [user] = await db.select().from(schema.usersTable).where(eq(schema.usersTable.username, body.username))
         if (user == undefined) {
