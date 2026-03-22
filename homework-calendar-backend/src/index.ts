@@ -15,6 +15,9 @@ import { assignmentRoutes } from './routes/assignment'
 import { classesRoutes } from './routes/classes'
 import { authRoutes } from './routes/auth'
 
+import { parseConfig } from "./utils"
+const config = parseConfig()
+
 const store = new CookieStore()
 
 const defaultUser = await db.select().from(schema.usersTable).execute()
@@ -47,6 +50,17 @@ const app = new Hono<{ Variables: SessionVariables }>()
     .route("/auth", authRoutes)
     .route("/assignment", assignmentRoutes)
     .route("/classes", classesRoutes)
+
+    .get("/config", (c) => {
+        return c.json({
+            success: true,
+            data: {
+                MULTIPLE_ACCOUNTS: config.MULTIPLE_ACCOUNTS,
+                ALLOW_LOGINS: config.ALLOW_REGISTRATION,
+                ALLOW_REGISTRATION: config.ALLOW_REGISTRATION,
+            }
+        } as const)
+    })
 
 export default {
     port: 5000,
