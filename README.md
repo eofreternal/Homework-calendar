@@ -12,9 +12,10 @@ I must say- `bun install` is faster than `pnpm` and `npm` hehe; I love `bun inst
 1. Install Bun :D
 2. Clone the repo
 3. `cd` into the frontend and backend directories and run `bun install` in each
-4. Run `bun run dev` in both folders too
-5. Visit `localhost:3000` in your browser
-6. Use it to organize your messy student life :p
+4. In the backend folder, run `bunx drizzle-kit generate`
+5. Run `bun run dev` in both folders too
+6. Visit `localhost:3000` in your browser
+7. Use it to organize your messy student life :p
 
 ---
 
