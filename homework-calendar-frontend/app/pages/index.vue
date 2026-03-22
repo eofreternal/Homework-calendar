@@ -232,39 +232,42 @@ onMounted(async () => {
     const configReq = await client.config.$get()
     const configJson = await configReq.json()
 
-    if (configJson.data.MULTIPLE_ACCOUNTS == false) {
-        toast.add({
-            color: "info",
-            title: "Logging in..."
-        })
-
-        const request = await client.auth.valid.$get()
-        const requestResponse = await request.json()
-        //@ts-expect-error this is intentional
-        if (requestResponse.success == false) {
-            userDataStore.setData(requestResponse.data)
-        }
-
-        const login = await client.auth.login.$post({ json: { username: "Default User", password: "default" } })
-        const json = await login.json()
-        if (json.success == false) {
-            toast.add({
-                color: "error",
-                title: "Something went wrong",
-                description: json.data
-            })
-            return
-        }
-        toast.add({
-            color: "success",
-            title: "Logged in"
-        })
+    const request = await client.auth.valid.$get()
+    const requestResponse = await request.json()
+    if (requestResponse.success == true) {
         userDataStore.setLoggedIn(true)
-        userDataStore.setData(json.data)
-    }
+        userDataStore.setData(requestResponse.data)
 
-    assignmentsStore.fetchAssignments()
-    assignmentsStore.fetchClasses()
+        assignmentsStore.fetchAssignments()
+        assignmentsStore.fetchClasses()
+    } else {
+        if (configJson.data.MULTIPLE_ACCOUNTS == false) {
+            toast.add({
+                color: "info",
+                title: "Logging in..."
+            })
+
+            const login = await client.auth.login.$post({ json: { username: "Default User", password: "default" } })
+            const json = await login.json()
+            if (json.success == false) {
+                toast.add({
+                    color: "error",
+                    title: "Something went wrong",
+                    description: json.data
+                })
+                return
+            }
+            toast.add({
+                color: "success",
+                title: "Logged in"
+            })
+            userDataStore.setLoggedIn(true)
+            userDataStore.setData(json.data)
+
+            assignmentsStore.fetchAssignments()
+            assignmentsStore.fetchClasses()
+        }
+    }
 })
 
 assignmentsStore.$subscribe((mutation, state) => {
