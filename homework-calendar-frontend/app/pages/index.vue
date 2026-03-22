@@ -318,41 +318,43 @@ assignmentsStore.$subscribe((mutation, state) => {
 <template>
     <main>
         <div class="flex flex-col gap-4">
-            <h1 class="text-2xl font-bold">Unfinished assignments from previous months</h1>
-            <UContainer class="old-assignments-container">
-                <template v-if="pageWidth > 1000">
-                    <div class="months">
-                        <h1 v-for="month in oldAssignments.keys()">{{ month }}</h1>
-                    </div>
+            <div v-show="(oldAssignments.keys()).toArray().length > 0">
+                <h1 class="text-2xl font-bold">Unfinished assignments from previous months</h1>
+                <UContainer class="old-assignments-container">
+                    <template v-if="pageWidth > 1000">
+                        <div class="months">
+                            <h1 v-for="month in oldAssignments.keys()">{{ month }}</h1>
+                        </div>
 
-                    <div class="assignments">
-                        <template v-for="month in oldAssignments.keys()">
-                            <div class="month-assignment">
-                                <template v-for="days in oldAssignments.get(month)">
-                                    <Date :day="days[0]" :assignments-for-day="days[1]"
-                                        @show-assignments-for-day="showAssignmentsForDayFunc" />
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-
-                <UPopover v-else class="assignments" v-for="monthName in oldAssignments.keys()">
-                    <UButton color="neutral" variant="subtle" class="monthName">
-                        <h1>{{ monthName }}</h1>
-                    </UButton>
-                    <template #content>
-                        <template v-for="month in oldAssignments.keys()">
-                            <div class="month-assignment">
-                                <template v-for="days in oldAssignments.get(month)">
-                                    <Date :day="days[0]" :assignments-for-day="days[1]"
-                                        @show-assignments-for-day="showAssignmentsForDayFunc" />
-                                </template>
-                            </div>
-                        </template>
+                        <div class="assignments">
+                            <template v-for="month in oldAssignments.keys()">
+                                <div class="month-assignment">
+                                    <template v-for="days in oldAssignments.get(month)">
+                                        <Date :day="days[0]" :assignments-for-day="days[1]"
+                                            @show-assignments-for-day="showAssignmentsForDayFunc" />
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
                     </template>
-                </UPopover>
-            </UContainer>
+
+                    <UPopover v-else class="assignments" v-for="monthName in oldAssignments.keys()">
+                        <UButton color="neutral" variant="subtle" class="monthName">
+                            <h1>{{ monthName }}</h1>
+                        </UButton>
+                        <template #content>
+                            <template v-for="month in oldAssignments.keys()">
+                                <div class="month-assignment">
+                                    <template v-for="days in oldAssignments.get(month)">
+                                        <Date :day="days[0]" :assignments-for-day="days[1]"
+                                            @show-assignments-for-day="showAssignmentsForDayFunc" />
+                                    </template>
+                                </div>
+                            </template>
+                        </template>
+                    </UPopover>
+                </UContainer>
+            </div>
             <USeparator />
             <!-- TODO: use HTML tables for better a11y -->
             <div class="desktop-calendar" v-if="pageWidth >= 1000">
