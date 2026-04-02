@@ -491,6 +491,9 @@ assignmentsStore.$subscribe((mutation, state) => {
                         </UButton>
                     </div>
                 </div>
+                <UButton @click="showCreateAssignmentModal = true" block>Create
+                    assignment
+                </UButton>
                 <USeparator />
                 <div class="flex flex-col gap-4">
                     <Assignment
